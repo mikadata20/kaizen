@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { saveMeasurementSession } from '../utils/database';
 import { exportToExcel } from '../utils/excelExport';
 import NarrationRecorder from './NarrationRecorder';
+import { THERBLIGS } from '../constants/therbligs.jsx';
 
 function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeasurements, narration = null, onNarrationChange }) {
     const [isSaving, setIsSaving] = useState(false);
@@ -9,8 +10,11 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
     const [editingId, setEditingId] = useState(null);
     const [editName, setEditName] = useState('');
     const [editCategory, setEditCategory] = useState('');
+    const [editTherblig, setEditTherblig] = useState('');
+    const [editCycle, setEditCycle] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
+    const [filterTherblig, setFilterTherblig] = useState('all');
     const [filterRating, setFilterRating] = useState('all');
     const [sortBy, setSortBy] = useState('order');
 
@@ -25,6 +29,16 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
         }
     };
 
+    const renderTherbligIcon = (code) => {
+        const therblig = THERBLIGS[code];
+        if (!therblig) return null;
+        return (
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                {therblig.icon}
+            </svg>
+        );
+    };
+
     const totalTime = measurements.reduce((sum, m) => sum + m.duration, 0);
     const valueAddedTime = measurements.filter(m => m.category === 'Value-added').reduce((sum, m) => sum + m.duration, 0);
     const nonValueAddedTime = measurements.filter(m => m.category === 'Non value-added').reduce((sum, m) => sum + m.duration, 0);
@@ -35,10 +49,14 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
             alert('Tidak ada data untuk disimpan!');
             return;
         }
+
+        const sessionName = prompt('Masukkan nama untuk sesi ini:', videoName || `Session ${new Date().toLocaleString()}`);
+        if (!sessionName) return;
+
         setIsSaving(true);
         setSaveMessage('');
         try {
-            await saveMeasurementSession(videoName, measurements, narration);
+            await saveMeasurementSession(sessionName, measurements, narration);
             setSaveMessage('✓ Data berhasil disimpan!');
             setTimeout(() => setSaveMessage(''), 3000);
         } catch (error) {
@@ -64,10 +82,12 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
         setEditingId(element.id);
         setEditName(element.elementName);
         setEditCategory(element.category);
+        setEditTherblig(element.therblig || '');
+        setEditCycle(element.cycle || 1);
     };
 
     const handleSaveEdit = () => {
-        onUpdateMeasurements(measurements.map(m => m.id === editingId ? { ...m, elementName: editName, category: editCategory } : m));
+        onUpdateMeasurements(measurements.map(m => m.id === editingId ? { ...m, elementName: editName, category: editCategory, therblig: editTherblig, cycle: parseInt(editCycle) || 1 } : m));
         setEditingId(null);
     };
 
@@ -75,6 +95,8 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
         setEditingId(null);
         setEditName('');
         setEditCategory('');
+        setEditTherblig('');
+        setEditCycle(1);
     };
 
     const handleMoveUp = (index) => {
@@ -135,6 +157,9 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
         if (filterCategory !== 'all') {
             filtered = filtered.filter(m => m.category === filterCategory);
         }
+        if (filterTherblig !== 'all') {
+            filtered = filtered.filter(m => m.therblig === filterTherblig);
+        }
         if (filterRating !== 'all') {
             const rating = parseInt(filterRating);
             filtered = filtered.filter(m => (m.rating || 0) >= rating);
@@ -163,12 +188,15 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-secondary)', padding: '10px' }}>
             {/* Filter Row with Action Buttons */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto 2fr 1fr 1fr 1fr', gap: '4px', marginBottom: '6px', padding: '3px 6px', backgroundColor: '#2a2a2a', borderRadius: '4px', alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto 2fr 1fr 1fr 1fr 1fr', gap: '4px', marginBottom: '6px', padding: '3px 6px', backgroundColor: '#2a2a2a', borderRadius: '4px', alignItems: 'center' }}>
                 <button onClick={handleSave} disabled={isSaving || measurements.length === 0} style={{ padding: '3px 8px', fontSize: '0.9rem', backgroundColor: measurements.length > 0 ? 'var(--accent-blue)' : '#555', cursor: measurements.length > 0 ? 'pointer' : 'not-allowed', border: 'none', borderRadius: '3px', color: 'white' }} title="Simpan ke Database">
                     {isSaving ? '⌛' : '💾'}
                 </button>
-                <button onClick={handleExport} disabled={measurements.length === 0} style={{ padding: '3px 8px', fontSize: '0.9rem', backgroundColor: measurements.length > 0 ? '#0a0' : '#555', cursor: measurements.length > 0 ? 'pointer' : 'not-allowed', border: 'none', borderRadius: '3px', color: 'white' }} title="Export ke Excel">
-                    📊
+                <button onClick={handleExport} disabled={measurements.length === 0} style={{ padding: '3px 8px', fontSize: '0.9rem', backgroundColor: measurements.length > 0 ? '#217346' : '#555', cursor: measurements.length > 0 ? 'pointer' : 'not-allowed', border: 'none', borderRadius: '3px', color: 'white' }} title="Export ke Excel">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ verticalAlign: 'middle' }}>
+                        <path d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6zm2-8h8v2H8v-2zm0 4h8v2H8v-2zm0-8h5v2H8V8z" />
+                        <text x="12" y="15" fontSize="10" fontWeight="bold" textAnchor="middle" fill="white">X</text>
+                    </svg>
                 </button>
                 <NarrationRecorder
                     sessionId={null}
@@ -181,6 +209,12 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
                     <option value="Value-added">Value-added</option>
                     <option value="Non value-added">Non value-added</option>
                     <option value="Waste">Waste</option>
+                </select>
+                <select value={filterTherblig} onChange={(e) => setFilterTherblig(e.target.value)} style={{ padding: '3px 6px', backgroundColor: '#1a1a1a', border: '1px solid #444', borderRadius: '3px', color: '#fff', fontSize: '0.75rem' }}>
+                    <option value="all">Semua Therblig</option>
+                    {Object.entries(THERBLIGS).map(([code, { name }]) => (
+                        <option key={code} value={code}>{code} - {name}</option>
+                    ))}
                 </select>
                 <select value={filterRating} onChange={(e) => setFilterRating(e.target.value)} style={{ padding: '3px 6px', backgroundColor: '#1a1a1a', border: '1px solid #444', borderRadius: '3px', color: '#fff', fontSize: '0.75rem' }}>
                     <option value="all">Semua Rating</option>
@@ -205,7 +239,7 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
                 </div>
             )}
 
-            {(searchQuery || filterCategory !== 'all' || filterRating !== 'all') && (
+            {(searchQuery || filterCategory !== 'all' || filterTherblig !== 'all' || filterRating !== 'all') && (
                 <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '8px', padding: '4px 8px', backgroundColor: '#2a2a2a', borderRadius: '4px' }}>
                     Menampilkan {filteredMeasurements.length} dari {measurements.length} elemen
                 </div>
@@ -219,6 +253,7 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
                             <th style={{ padding: '4px', border: '1px solid #444', width: '60px', fontSize: '0.7rem' }}>Cycle</th>
                             <th style={{ padding: '4px', border: '1px solid #444', fontSize: '0.7rem' }}>Proses</th>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '150px', fontSize: '0.7rem' }}>Kategori</th>
+                            <th style={{ padding: '4px', border: '1px solid #444', width: '120px', fontSize: '0.7rem' }}>Therblig</th>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '120px', fontSize: '0.7rem' }}>Rating</th>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '70px', fontSize: '0.7rem' }}>Start (s)</th>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '70px', fontSize: '0.7rem' }}>Finish (s)</th>
@@ -229,7 +264,7 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
                     <tbody>
                         {filteredMeasurements.length === 0 ? (
                             <tr>
-                                <td colSpan="9" style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                                <td colSpan="10" style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
                                     {measurements.length === 0 ? 'Belum ada elemen. Mulai pengukuran untuk menambahkan elemen.' : 'Tidak ada elemen yang sesuai dengan filter.'}
                                 </td>
                             </tr>
@@ -240,9 +275,19 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
                                     <tr key={el.id} style={{ borderBottom: '1px solid #333' }}>
                                         <td style={{ padding: '6px', border: '1px solid #444', textAlign: 'center' }}>{originalIndex + 1}</td>
                                         <td style={{ padding: '6px', border: '1px solid #444', textAlign: 'center' }}>
-                                            <span style={{ backgroundColor: '#333', padding: '2px 6px', borderRadius: '4px', border: '1px solid #555' }}>
-                                                {el.cycle || 1}
-                                            </span>
+                                            {editingId === el.id ? (
+                                                <input
+                                                    type="number"
+                                                    value={editCycle}
+                                                    onChange={(e) => setEditCycle(e.target.value)}
+                                                    min="1"
+                                                    style={{ width: '60px', padding: '4px', backgroundColor: '#222', border: '1px solid #555', color: 'white', fontSize: '0.85rem', textAlign: 'center' }}
+                                                />
+                                            ) : (
+                                                <span style={{ backgroundColor: '#333', padding: '2px 6px', borderRadius: '4px', border: '1px solid #555' }}>
+                                                    {el.cycle || 1}
+                                                </span>
+                                            )}
                                         </td>
                                         <td style={{ padding: '6px', border: '1px solid #444' }}>
                                             {editingId === el.id ? (
@@ -256,6 +301,23 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
                                                 </select>
                                             ) : (
                                                 <span style={{ display: 'inline-block', padding: '3px 8px', backgroundColor: getCategoryColor(el.category), borderRadius: '3px', fontSize: '0.8rem' }}>{el.category}</span>
+                                            )}
+                                        </td>
+                                        <td style={{ padding: '6px', border: '1px solid #444' }}>
+                                            {editingId === el.id ? (
+                                                <select value={editTherblig} onChange={(e) => setEditTherblig(e.target.value)} style={{ width: '100%', padding: '4px', backgroundColor: '#222', border: '1px solid #555', color: 'white', fontSize: '0.85rem' }}>
+                                                    <option value="">-- Pilih --</option>
+                                                    {Object.entries(THERBLIGS).map(([code, { name }]) => (
+                                                        <option key={code} value={code}>{code} - {name}</option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                el.therblig && THERBLIGS[el.therblig] ? (
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '3px 8px', backgroundColor: THERBLIGS[el.therblig].color + '40', border: `1px solid ${THERBLIGS[el.therblig].color}`, borderRadius: '3px', fontSize: '0.8rem', color: '#fff' }}>
+                                                        {renderTherbligIcon(el.therblig)}
+                                                        <span>{el.therblig}</span>
+                                                    </span>
+                                                ) : '-'
                                             )}
                                         </td>
                                         <td style={{ padding: '6px', border: '1px solid #444', textAlign: 'center' }}>

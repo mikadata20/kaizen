@@ -99,9 +99,21 @@ export function useVideoPlayer(initialMeasurements = []) {
 
     // Add measurement
     const addMeasurement = (measurement) => {
+        const newMeasurement = {
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9), // Unique ID
+            elementName: measurement.elementName || 'New Element',
+            category: measurement.category || 'Non value-added',
+            therblig: measurement.therblig || '',
+            rating: measurement.rating || 0,
+            cycle: measurement.cycle || 1,
+            startTime: measurement.startTime,
+            endTime: measurement.endTime,
+            duration: measurement.duration
+        };
+
         setVideoState(prev => ({
             ...prev,
-            measurements: [...prev.measurements, measurement]
+            measurements: [...prev.measurements, newMeasurement]
         }));
     };
 
@@ -129,7 +141,36 @@ export function useVideoPlayer(initialMeasurements = []) {
     // Keyboard shortcuts
     useEffect(() => {
         const handleKeyPress = (e) => {
-            if (e.key === ' ') {
+            // Ctrl + Alt: Add new measurement
+            if (e.ctrlKey && e.altKey) {
+                e.preventDefault();
+
+                // Find the last measurement to get start time
+                let startTime = videoRef.current ? videoRef.current.currentTime : 0;
+
+                if (videoState.measurements.length > 0) {
+                    const sortedMeasurements = [...videoState.measurements].sort((a, b) => b.endTime - a.endTime);
+                    const lastMeasurement = sortedMeasurements[0];
+                    startTime = lastMeasurement.endTime;
+                }
+
+                // Get current video time as end time
+                const currentTime = videoRef.current ? videoRef.current.currentTime : startTime + 1;
+                let endTime = Math.max(currentTime, startTime + 0.5);
+
+                // Make sure we don't exceed video duration
+                if (videoState.duration && endTime > videoState.duration) {
+                    endTime = videoState.duration;
+                }
+
+                const duration = endTime - startTime;
+
+                addMeasurement({
+                    startTime: startTime,
+                    endTime: endTime,
+                    duration: duration
+                });
+            } else if (e.key === 'Control') {
                 e.preventDefault();
                 togglePlay();
             } else if (e.key === 'ArrowRight') {
@@ -143,7 +184,7 @@ export function useVideoPlayer(initialMeasurements = []) {
 
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [videoState.isPlaying]);
+    }, [videoState.isPlaying, videoState.measurements, videoState.duration]);
 
     return {
         videoRef,

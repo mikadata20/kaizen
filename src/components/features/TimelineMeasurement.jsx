@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { THERBLIGS } from '../../constants/therbligs.jsx';
 
 function TimelineMeasurement({ videoState, onAddMeasurement, onRemoveMeasurement }) {
     const [measurementStart, setMeasurementStart] = useState(null);
     const [newElementName, setNewElementName] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Value-added');
+    const [selectedTherblig, setSelectedTherblig] = useState('');
     const [quickMode, setQuickMode] = useState(false);
     const [autoCounter, setAutoCounter] = useState(1);
     const [currentCycle, setCurrentCycle] = useState(1);
@@ -34,6 +36,7 @@ function TimelineMeasurement({ videoState, onAddMeasurement, onRemoveMeasurement
                 endTime: videoState.currentTime,
                 elementName: newElementName,
                 category: selectedCategory,
+                therblig: selectedTherblig,
                 duration: videoState.currentTime - measurementStart,
                 rating: 0,
                 cycle: currentCycle
@@ -76,7 +79,7 @@ function TimelineMeasurement({ videoState, onAddMeasurement, onRemoveMeasurement
 
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [measurementStart, newElementName, selectedCategory, quickMode, autoCounter, currentCycle]);
+    }, [measurementStart, newElementName, selectedCategory, selectedTherblig, quickMode, autoCounter, currentCycle]);
 
     return (
         <div style={{
@@ -216,6 +219,25 @@ function TimelineMeasurement({ videoState, onAddMeasurement, onRemoveMeasurement
                                     <option key={cat} value={cat}>{cat}</option>
                                 ))}
                             </select>
+                            <select
+                                value={selectedTherblig}
+                                onChange={(e) => setSelectedTherblig(e.target.value)}
+                                style={{
+                                    padding: '4px 8px',
+                                    backgroundColor: '#333',
+                                    border: '1px solid #555',
+                                    color: 'white',
+                                    borderRadius: '4px',
+                                    fontSize: '0.75rem',
+                                    flexShrink: 0,
+                                    maxWidth: '100px'
+                                }}
+                            >
+                                <option value="">Therblig</option>
+                                {Object.entries(THERBLIGS).map(([code, { name }]) => (
+                                    <option key={code} value={code}>{code}</option>
+                                ))}
+                            </select>
                         </>
                     )}
                 </div>
@@ -283,6 +305,17 @@ function TimelineMeasurement({ videoState, onAddMeasurement, onRemoveMeasurement
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <span style={{ color: '#888', fontSize: '0.75rem', border: '1px solid #555', padding: '0 4px', borderRadius: '3px' }}>C{m.cycle || 1}</span>
                                     <span>{m.elementName}</span>
+                                    {m.therblig && (
+                                        <span style={{
+                                            backgroundColor: '#444',
+                                            padding: '0 4px',
+                                            borderRadius: '3px',
+                                            fontSize: '0.7rem',
+                                            color: '#ccc'
+                                        }}>
+                                            {m.therblig}
+                                        </span>
+                                    )}
                                 </div>
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <span>{m.duration.toFixed(2)}s</span>

@@ -2,10 +2,25 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ElementEditor from './ElementEditor';
 import PlaybackControls from './features/PlaybackControls';
 import TimelineMeasurement from './features/TimelineMeasurement';
+import TimelineEditor from './features/TimelineEditor';
+import ProjectButtons from './ProjectButtons';
 import { useVideoPlayer } from '../hooks/useVideoPlayer';
 import { captureScreenshot, exportAnalysisData } from '../utils/screenshotCapture';
 
-function VideoWorkspace({ onMeasurementsChange, videoSrc, setVideoSrc, measurements }) {
+function VideoWorkspace({
+    measurements,
+    onUpdateMeasurements,
+    videoSrc,
+    onVideoChange,
+    videoName,
+    onVideoNameChange,
+    currentProject,
+    onNewProject,
+    onOpenProject,
+    onExportProject,
+    onImportProject,
+    onLogout
+}) {
     const fileInputRef = useRef(null);
     const [logoUrl, setLogoUrl] = useState(null);
     const [logoPosition, setLogoPosition] = useState('bottom-right');
@@ -65,7 +80,8 @@ function VideoWorkspace({ onMeasurementsChange, videoSrc, setVideoSrc, measureme
         const file = event.target.files[0];
         if (file) {
             const url = URL.createObjectURL(file);
-            setVideoSrc(url);
+            onVideoChange(url);
+            onVideoNameChange(file.name);
         }
     };
 
@@ -78,6 +94,7 @@ function VideoWorkspace({ onMeasurementsChange, videoSrc, setVideoSrc, measureme
         exportAnalysisData(videoState.measurements, videoName);
     };
 
+
     // Handle seek from timeline
     useEffect(() => {
         const handleSeek = (e) => {
@@ -89,10 +106,8 @@ function VideoWorkspace({ onMeasurementsChange, videoSrc, setVideoSrc, measureme
 
     // Sync measurements with parent
     useEffect(() => {
-        if (onMeasurementsChange) {
-            onMeasurementsChange(videoState.measurements);
-        }
-    }, [videoState.measurements, onMeasurementsChange]);
+        onUpdateMeasurements(videoState.measurements);
+    }, [videoState.measurements, onUpdateMeasurements]);
 
     // Handle logo upload from header
     useEffect(() => {
@@ -237,6 +252,47 @@ function VideoWorkspace({ onMeasurementsChange, videoSrc, setVideoSrc, measureme
                         </div>
                     )}
 
+                    {/* Logout Button - Top Left */}
+                    {onLogout && (
+                        <button
+                            onClick={onLogout}
+                            style={{
+                                position: 'absolute',
+                                top: '10px',
+                                left: '10px',
+                                zIndex: 100,
+                                backgroundColor: '#c50f1f',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                padding: '6px',
+                                cursor: 'pointer',
+                                fontSize: '1.1rem',
+                                fontWeight: 'bold',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '35px',
+                                height: '35px',
+                                boxShadow: '0 2px 8px rgba(197, 15, 31, 0.3)',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.backgroundColor = '#a00f1a';
+                                e.target.style.transform = 'scale(1.1)';
+                                e.target.style.boxShadow = '0 4px 12px rgba(197, 15, 31, 0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.backgroundColor = '#c50f1f';
+                                e.target.style.transform = 'scale(1)';
+                                e.target.style.boxShadow = '0 2px 8px rgba(197, 15, 31, 0.3)';
+                            }}
+                            title="Logout dari aplikasi"
+                        >
+                            🔒
+                        </button>
+                    )}
+
                     {/* Logo Overlay */}
                     {videoSrc && logoUrl && (
                         <img
@@ -245,7 +301,26 @@ function VideoWorkspace({ onMeasurementsChange, videoSrc, setVideoSrc, measureme
                             style={getLogoStyle()}
                         />
                     )}
+
+                    {/* Project Management Buttons */}
+                    <ProjectButtons
+                        currentProject={currentProject}
+                        onNewProject={onNewProject}
+                        onOpenProject={onOpenProject}
+                        onExportProject={onExportProject}
+                        onImportProject={onImportProject}
+                    />
                 </div>
+
+                {/* Timeline Editor */}
+                {videoSrc && (
+                    <TimelineEditor
+                        videoState={videoState}
+                        measurements={videoState.measurements}
+                        onSeek={seekTo}
+                        onAddMeasurement={addMeasurement}
+                    />
+                )}
 
                 {/* Playback Controls */}
                 {videoSrc && (

@@ -1,0 +1,383 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { THERBLIGS } from '../constants/therbligs.jsx';
+import { getAllSessions } from '../utils/database';
+
+function TherbligAnalysis({ measurements = [] }) {
+    const [icons, setIcons] = useState([]);
+    const [selectedTherblig, setSelectedTherblig] = useState(null);
+    const [backgroundImage, setBackgroundImage] = useState(null);
+    const [showSessionModal, setShowSessionModal] = useState(false);
+    const [sessions, setSessions] = useState([]);
+    const canvasRef = useRef(null);
+    const containerRef = useRef(null);
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setBackgroundImage(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleCanvasClick = (e) => {
+        if (!selectedTherblig) return;
+
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const newIcon = {
+            id: Date.now(),
+            code: selectedTherblig,
+            x,
+            y,
+        };
+
+        setIcons([...icons, newIcon]);
+    };
+
+    const handleRemoveIcon = (id, e) => {
+        e.stopPropagation();
+        setIcons(icons.filter(icon => icon.id !== id));
+    };
+
+    const handleClearAll = () => {
+        if (confirm('Are you sure you want to clear all icons?')) {
+            setIcons([]);
+        }
+    };
+
+    const handleOpenGenerateModal = async () => {
+        try {
+            const savedSessions = await getAllSessions();
+            setSessions(savedSessions);
+            setShowSessionModal(true);
+        } catch (error) {
+            console.error('Error fetching sessions:', error);
+            alert('Failed to fetch saved sessions. Using current measurements only.');
+            generateFlowFromMeasurements(measurements);
+        }
+    };
+
+    const generateFlowFromMeasurements = (targetMeasurements) => {
+        if (!targetMeasurements || targetMeasurements.length === 0) {
+            alert('No measurements available to generate flow.');
+            return;
+        }
+
+        if (confirm('This will clear current icons and generate a new flow. Continue?')) {
+            const newIcons = [];
+            const containerWidth = containerRef.current ? containerRef.current.clientWidth : 800;
+            const startX = 50;
+            const startY = 50;
+            const gapX = 60;
+            const gapY = 80;
+
+            let currentX = startX;
+            let currentY = startY;
+            let direction = 1; // 1 for right, -1 for left
+
+            targetMeasurements.forEach((m, index) => {
+                if (m.therblig && THERBLIGS[m.therblig]) {
+                    newIcons.push({
+                        id: Date.now() + index,
+                        code: m.therblig,
+                        x: currentX,
+                        y: currentY,
+                        sequence: index + 1
+                    });
+
+                    // Calculate next position
+                    if ((direction === 1 && currentX + gapX > containerWidth - 50) ||
+                        (direction === -1 && currentX - gapX < 50)) {
+                        currentY += gapY;
+                        direction *= -1;
+                    } else {
+                        currentX += gapX * direction;
+                    }
+                }
+            });
+
+            if (newIcons.length === 0) {
+                alert('No measurements have valid Therblig codes assigned. Please edit your measurements in the Dashboard to assign Therblig codes before generating a flow.');
+            }
+
+            setIcons(newIcons);
+            setShowSessionModal(false);
+        }
+    };
+
+    return (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '10px', gap: '10px', backgroundColor: 'var(--bg-primary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-secondary)', padding: '10px', borderRadius: '8px' }}>
+                <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Therblig Analysis</h2>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: 'none' }}
+                        id="layout-upload"
+                    />
+                    <button
+                        className="btn"
+                        onClick={handleOpenGenerateModal}
+                        style={{ backgroundColor: '#0a5', color: 'white', padding: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+                        title="Generate flow from measurements"
+                    >
+                        Generate Flow
+                    </button>
+                    <button
+                        className="btn"
+                        onClick={() => document.getElementById('layout-upload').click()}
+                        style={{ backgroundColor: 'var(--accent-blue)', color: 'white', padding: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+                    >
+                        Upload Layout
+                    </button>
+                    <button
+                        className="btn"
+                        onClick={handleClearAll}
+                        style={{ backgroundColor: '#c50f1f', color: 'white', padding: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+                    >
+                        Clear All
+                    </button>
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', flex: 1, gap: '10px', overflow: 'hidden' }}>
+                {/* Sidebar for Therblig Selection */}
+                <div style={{ width: '200px', backgroundColor: 'var(--bg-secondary)', padding: '10px', borderRadius: '8px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <h3 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Select Therblig</h3>
+                    {Object.entries(THERBLIGS).map(([code, { name, color, icon }]) => (
+                        <div
+                            key={code}
+                            onClick={() => setSelectedTherblig(code)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '8px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                backgroundColor: selectedTherblig === code ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                                border: selectedTherblig === code ? `1px solid ${color}` : '1px solid transparent'
+                            }}
+                        >
+                            <div style={{
+                                width: '24px',
+                                height: '24px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: color
+                            }}>
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                    {icon}
+                                </svg>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{code}</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{name}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Canvas Area */}
+                <div
+                    ref={containerRef}
+                    onClick={handleCanvasClick}
+                    style={{
+                        flex: 1,
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: '8px',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        cursor: selectedTherblig ? 'crosshair' : 'default',
+                        backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none',
+                        backgroundSize: 'contain',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center'
+                    }}
+                >
+                    {!backgroundImage && icons.length === 0 && (
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#555', textAlign: 'center', pointerEvents: 'none' }}>
+                            <p>Upload a layout image to start placing Therbligs</p>
+                            <p style={{ fontSize: '0.8rem' }}>Or click "Generate Flow" to visualize measurements</p>
+                        </div>
+                    )}
+
+                    {/* Connection Lines */}
+                    <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+                        {icons.map((icon, index) => {
+                            if (index === icons.length - 1) return null;
+                            const nextIcon = icons[index + 1];
+                            return (
+                                <line
+                                    key={`line-${icon.id}`}
+                                    x1={icon.x}
+                                    y1={icon.y}
+                                    x2={nextIcon.x}
+                                    y2={nextIcon.y}
+                                    stroke="#555"
+                                    strokeWidth="2"
+                                    strokeDasharray="5,5"
+                                />
+                            );
+                        })}
+                    </svg>
+
+                    {icons.map((icon, index) => {
+                        const therblig = THERBLIGS[icon.code];
+                        return (
+                            <div
+                                key={icon.id}
+                                style={{
+                                    position: 'absolute',
+                                    left: icon.x,
+                                    top: icon.y,
+                                    transform: 'translate(-50%, -50%)',
+                                    width: '32px',
+                                    height: '32px',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: `2px solid ${therblig.color}`,
+                                    color: therblig.color,
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 5px rgba(0,0,0,0.5)',
+                                    zIndex: 1
+                                }}
+                                title={`${index + 1}. ${therblig.name} (Click to remove)`}
+                                onClick={(e) => handleRemoveIcon(icon.id, e)}
+                            >
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                    {therblig.icon}
+                                </svg>
+                                <span style={{
+                                    position: 'absolute',
+                                    top: '-15px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    fontSize: '0.7rem',
+                                    color: '#fff',
+                                    backgroundColor: '#333',
+                                    padding: '1px 4px',
+                                    borderRadius: '3px',
+                                    whiteSpace: 'nowrap'
+                                }}>
+                                    {index + 1}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Session Selection Modal */}
+            {showSessionModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: '#2a2a2a',
+                        padding: '20px',
+                        borderRadius: '8px',
+                        width: '400px',
+                        maxHeight: '80vh',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '15px',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+                    }}>
+                        <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>Select Data Source</h3>
+
+                        <button
+                            onClick={() => generateFlowFromMeasurements(measurements)}
+                            style={{
+                                padding: '12px',
+                                backgroundColor: '#005a9e',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}
+                        >
+                            <span>Current Active Session</span>
+                            <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>{measurements.length} items</span>
+                        </button>
+
+                        <div style={{ height: '1px', backgroundColor: '#444' }}></div>
+
+                        <div style={{ overflowY: 'auto', maxHeight: '300px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <h4 style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#aaa' }}>Saved Sessions</h4>
+                            {sessions.length === 0 ? (
+                                <div style={{ color: '#666', fontStyle: 'italic', padding: '10px', textAlign: 'center' }}>No saved sessions found</div>
+                            ) : (
+                                sessions.map(session => (
+                                    <button
+                                        key={session.id}
+                                        onClick={() => generateFlowFromMeasurements(session.measurements)}
+                                        style={{
+                                            padding: '10px',
+                                            backgroundColor: '#333',
+                                            color: 'var(--text-primary)',
+                                            border: '1px solid #444',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '4px'
+                                        }}
+                                    >
+                                        <span style={{ fontWeight: 'bold' }}>{session.videoName || 'Untitled'}</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#888' }}>
+                                            <span>{new Date(session.timestamp).toLocaleDateString()}</span>
+                                            <span>{session.measurements ? session.measurements.length : 0} items</span>
+                                        </div>
+                                    </button>
+                                ))
+                            )}
+                        </div>
+
+                        <button
+                            onClick={() => setShowSessionModal(false)}
+                            style={{
+                                padding: '8px',
+                                backgroundColor: 'transparent',
+                                color: '#aaa',
+                                border: '1px solid #555',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                marginTop: '10px'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default TherbligAnalysis;
