@@ -1,53 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { getAllSessions, deleteSession, getSessionById } from '../utils/database';
+import { getAllProjects, deleteProjectById, getProjectById } from '../utils/database';
 
 function SessionManager({ onLoadSession, onClose }) {
-    const [sessions, setSessions] = useState([]);
+    const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        loadSessions();
+        loadProjects();
     }, []);
 
-    const loadSessions = async () => {
+    const loadProjects = async () => {
         try {
-            const allSessions = await getAllSessions();
-            // Sort by timestamp (newest first)
-            allSessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            setSessions(allSessions);
+            const allProjects = await getAllProjects();
+            // Sort by last modified (newest first)
+            allProjects.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+            setProjects(allProjects);
         } catch (error) {
-            console.error('Error loading sessions:', error);
+            console.error('Error loading projects:', error);
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (confirm('Hapus session ini?')) {
+        if (confirm('Hapus proyek ini?')) {
             try {
-                await deleteSession(id);
-                await loadSessions();
+                await deleteProjectById(id);
+                await loadProjects();
             } catch (error) {
-                console.error('Error deleting session:', error);
-                alert('Gagal menghapus session');
+                console.error('Error deleting project:', error);
+                alert('Gagal menghapus proyek');
             }
         }
     };
 
     const handleLoad = async (id) => {
         try {
-            const session = await getSessionById(id);
-            onLoadSession(session);
+            const project = await getProjectById(id);
+            // Map project structure to session structure expected by App
+            const sessionData = {
+                ...project,
+                measurements: project.measurements || []
+            };
+            onLoadSession(sessionData);
             onClose();
         } catch (error) {
-            console.error('Error loading session:', error);
-            alert('Gagal memuat session');
+            console.error('Error loading project:', error);
+            alert('Gagal memuat proyek');
         }
     };
 
-    const filteredSessions = sessions.filter(s =>
-        s.videoName.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredProjects = projects.filter(p =>
+        (p.projectName || p.videoName || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const formatDate = (timestamp) => {
@@ -92,7 +97,7 @@ function SessionManager({ onLoadSession, onClose }) {
                     alignItems: 'center'
                 }}>
                     <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem' }}>
-                        📂 Session Manager
+                        📂 Project Manager
                     </h2>
                     <button
                         onClick={onClose}
@@ -113,7 +118,7 @@ function SessionManager({ onLoadSession, onClose }) {
                 <div style={{ padding: '15px 20px', borderBottom: '1px solid #555' }}>
                     <input
                         type="text"
-                        placeholder="Cari session..."
+                        placeholder="Cari proyek..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         style={{
@@ -128,22 +133,22 @@ function SessionManager({ onLoadSession, onClose }) {
                     />
                 </div>
 
-                {/* Sessions List */}
+                {/* Projects List */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '10px 20px' }}>
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
-                            Loading sessions...
+                            Loading projects...
                         </div>
-                    ) : filteredSessions.length === 0 ? (
+                    ) : filteredProjects.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
-                            {searchTerm ? 'Tidak ada session yang cocok' : 'Belum ada session tersimpan'}
+                            {searchTerm ? 'Tidak ada proyek yang cocok' : 'Belum ada proyek tersimpan'}
                         </div>
                     ) : (
-                        filteredSessions.map((session) => {
-                            const totalTime = session.measurements.reduce((sum, m) => sum + m.duration, 0);
+                        filteredProjects.map((project) => {
+                            const totalTime = (project.measurements || []).reduce((sum, m) => sum + m.duration, 0);
                             return (
                                 <div
-                                    key={session.id}
+                                    key={project.id}
                                     style={{
                                         backgroundColor: '#1a1a1a',
                                         border: '1px solid #333',
@@ -157,19 +162,19 @@ function SessionManager({ onLoadSession, onClose }) {
                                 >
                                     <div style={{ flex: 1 }}>
                                         <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 'bold', marginBottom: '5px' }}>
-                                            {session.videoName}
+                                            {project.projectName || project.videoName || 'Untitled Project'}
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '5px' }}>
-                                            📅 {formatDate(session.timestamp)}
+                                            📅 {formatDate(project.lastModified)}
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: '#aaa' }}>
-                                            {session.measurements.length} elements • {totalTime.toFixed(2)}s total
+                                            {(project.measurements || []).length} elements • {totalTime.toFixed(2)}s total
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '10px' }}>
                                         <button
                                             className="btn"
-                                            onClick={() => handleLoad(session.id)}
+                                            onClick={() => handleLoad(project.id)}
                                             style={{
                                                 padding: '6px 12px',
                                                 fontSize: '0.85rem',
@@ -180,7 +185,7 @@ function SessionManager({ onLoadSession, onClose }) {
                                         </button>
                                         <button
                                             className="btn"
-                                            onClick={() => handleDelete(session.id)}
+                                            onClick={() => handleDelete(project.id)}
                                             style={{
                                                 padding: '6px 12px',
                                                 fontSize: '0.85rem',

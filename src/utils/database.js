@@ -238,3 +238,32 @@ export const deleteProject = async (projectName) => {
     });
 };
 
+// Get project by ID
+export const getProjectById = async (id) => {
+    const db = await initDB();
+    const PROJECTS_STORE = 'projects';
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([PROJECTS_STORE], 'readonly');
+        const store = transaction.objectStore(PROJECTS_STORE);
+        const request = store.get(id);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+};
+
+// Delete project by ID
+export const deleteProjectById = async (id) => {
+    const db = await initDB();
+    const PROJECTS_STORE = 'projects';
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([PROJECTS_STORE], 'readwrite');
+        const store = transaction.objectStore(PROJECTS_STORE);
+        const request = store.delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+};

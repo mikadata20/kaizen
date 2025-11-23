@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 function ElementRearrangement({ measurements, videoSrc, onUpdateMeasurements }) {
+    console.log('ElementRearrangement render. videoSrc:', videoSrc ? 'Present' : 'Missing', 'Elements:', measurements.length);
     const [elements, setElements] = useState([]);
     const [draggedItem, setDraggedItem] = useState(null);
     const [isSimulating, setIsSimulating] = useState(false);
@@ -51,12 +52,29 @@ function ElementRearrangement({ measurements, videoSrc, onUpdateMeasurements }) 
     };
 
     const startSimulation = () => {
-        if (!videoRef.current || elements.length === 0) return;
+        console.log('startSimulation called');
+
+        if (!videoSrc) {
+            alert('Video belum dimuat! Silakan muat proyek atau video terlebih dahulu.');
+            return;
+        }
+
+        if (elements.length === 0) {
+            alert('Belum ada elemen untuk disimulasikan!');
+            return;
+        }
+
+        if (!videoRef.current) {
+            console.warn('Video ref missing despite videoSrc present');
+            return;
+        }
+
         setIsSimulating(true);
         setCurrentSimulatingIndex(0);
     };
 
     const stopSimulation = () => {
+        console.log('stopSimulation called');
         setIsSimulating(false);
         setCurrentSimulatingIndex(-1);
         if (videoRef.current) {
@@ -75,14 +93,30 @@ function ElementRearrangement({ measurements, videoSrc, onUpdateMeasurements }) 
             }
 
             const element = elements[currentSimulatingIndex];
-            if (videoRef.current) {
-                videoRef.current.currentTime = element.startTime;
-                videoRef.current.play().catch(err => console.error("Video play error:", err));
+            console.log('Simulating element:', currentSimulatingIndex, element);
 
-                const durationMs = element.duration * 1000;
-                simulationTimeoutRef.current = setTimeout(() => {
+            if (videoRef.current) {
+                const startTime = Number(element.startTime);
+                if (!isNaN(startTime)) {
+                    videoRef.current.currentTime = startTime;
+                    videoRef.current.play().catch(err => {
+                        console.error("Video play error:", err);
+                        // Try playing muted if autoplay blocked
+                        if (err.name === 'NotAllowedError') {
+                            videoRef.current.muted = true;
+                            videoRef.current.play().catch(e => console.error("Muted play also failed:", e));
+                        }
+                    });
+
+                    const durationMs = element.duration * 1000;
+                    simulationTimeoutRef.current = setTimeout(() => {
+                        setCurrentSimulatingIndex(prev => prev + 1);
+                    }, durationMs);
+                } else {
+                    console.warn('Invalid startTime for element:', element);
+                    // Skip to next if invalid
                     setCurrentSimulatingIndex(prev => prev + 1);
-                }, durationMs);
+                }
             }
         }
 
@@ -240,7 +274,6 @@ function ElementRearrangement({ measurements, videoSrc, onUpdateMeasurements }) 
                         <button
                             className="btn"
                             onClick={startSimulation}
-                            disabled={!videoSrc || elements.length === 0}
                             style={{
                                 padding: '10px 30px',
                                 fontSize: '1.1rem',

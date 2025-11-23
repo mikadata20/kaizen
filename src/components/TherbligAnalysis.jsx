@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { THERBLIGS } from '../constants/therbligs.jsx';
-import { getAllSessions } from '../utils/database';
+import { getAllProjects } from '../utils/database';
 
 function TherbligAnalysis({ measurements = [] }) {
     const [icons, setIcons] = useState([]);
@@ -52,12 +52,22 @@ function TherbligAnalysis({ measurements = [] }) {
 
     const handleOpenGenerateModal = async () => {
         try {
-            const savedSessions = await getAllSessions();
-            setSessions(savedSessions);
+            const allProjects = await getAllProjects();
+            // Sort by last modified
+            allProjects.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+
+            const mappedSessions = allProjects.map(p => ({
+                id: p.id,
+                videoName: p.videoName || p.projectName,
+                timestamp: p.lastModified,
+                measurements: p.measurements || []
+            }));
+
+            setSessions(mappedSessions);
             setShowSessionModal(true);
         } catch (error) {
-            console.error('Error fetching sessions:', error);
-            alert('Failed to fetch saved sessions. Using current measurements only.');
+            console.error('Error fetching projects:', error);
+            alert('Failed to fetch saved projects. Using current measurements only.');
             generateFlowFromMeasurements(measurements);
         }
     };

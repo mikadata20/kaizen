@@ -208,7 +208,7 @@ function App() {
           </div>
         ) : currentView === 'rearrangement' ? (
           <div style={{ flex: 1, padding: '10px', overflow: 'hidden' }}>
-            <ElementRearrangement measurements={measurements} onUpdateMeasurements={setMeasurements} />
+            <ElementRearrangement measurements={measurements} onUpdateMeasurements={setMeasurements} videoSrc={videoSrc} />
           </div>
         ) : currentView === 'comparison' ? (
           <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>

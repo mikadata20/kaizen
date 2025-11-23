@@ -1,37 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { getAllSessions } from '../utils/database';
+import { getAllProjects } from '../utils/database';
 import { exportComparisonToExcel } from '../utils/excelExport';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function ComparisonDashboard() {
-    const [sessions, setSessions] = useState([]);
-    const [selectedSessionIds, setSelectedSessionIds] = useState([]);
+    const [projects, setProjects] = useState([]);
+    const [selectedProjectIds, setSelectedProjectIds] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        loadSessions();
+        loadProjects();
     }, []);
 
-    const loadSessions = async () => {
+    const loadProjects = async () => {
         try {
-            const allSessions = await getAllSessions();
-            // Sort by timestamp (newest first)
-            allSessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            setSessions(allSessions);
+            const allProjects = await getAllProjects();
+            // Sort by last modified (newest first)
+            allProjects.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+            setProjects(allProjects);
         } catch (error) {
-            console.error('Error loading sessions:', error);
+            console.error('Error loading projects:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const toggleSessionSelection = (id) => {
-        setSelectedSessionIds(prev => {
+    const toggleProjectSelection = (id) => {
+        setSelectedProjectIds(prev => {
             if (prev.includes(id)) {
-                return prev.filter(sessionId => sessionId !== id);
+                return prev.filter(projectId => projectId !== id);
             } else {
                 if (prev.length >= 5) {
-                    alert('Maksimal 5 sesi untuk perbandingan.');
+                    alert('Maksimal 5 proyek untuk perbandingan.');
                     return prev;
                 }
                 return [...prev, id];
@@ -39,25 +39,26 @@ function ComparisonDashboard() {
         });
     };
 
-    const getSelectedSessionsData = () => {
-        return sessions.filter(s => selectedSessionIds.includes(s.id));
+    const getSelectedProjectsData = () => {
+        return projects.filter(p => selectedProjectIds.includes(p.id));
     };
 
-    const calculateStats = (session) => {
-        const totalTime = session.measurements.reduce((sum, m) => sum + m.duration, 0);
-        const valueAdded = session.measurements
+    const calculateStats = (project) => {
+        const measurements = project.measurements || [];
+        const totalTime = measurements.reduce((sum, m) => sum + m.duration, 0);
+        const valueAdded = measurements
             .filter(m => m.category === 'Value-added')
             .reduce((sum, m) => sum + m.duration, 0);
-        const nonValueAdded = session.measurements
+        const nonValueAdded = measurements
             .filter(m => m.category === 'Non value-added')
             .reduce((sum, m) => sum + m.duration, 0);
-        const waste = session.measurements
+        const waste = measurements
             .filter(m => m.category === 'Waste')
             .reduce((sum, m) => sum + m.duration, 0);
 
         return {
-            name: session.videoName || `Session ${session.id}`,
-            date: new Date(session.timestamp).toLocaleDateString(),
+            name: project.projectName || project.videoName || `Project ${project.id}`,
+            date: new Date(project.lastModified).toLocaleDateString(),
             totalTime,
             valueAdded,
             nonValueAdded,
@@ -66,26 +67,26 @@ function ComparisonDashboard() {
         };
     };
 
-    const selectedData = getSelectedSessionsData().map(calculateStats);
+    const selectedData = getSelectedProjectsData().map(calculateStats);
 
     return (
         <div style={{ height: '100%', display: 'flex', gap: '20px', padding: '20px', backgroundColor: 'var(--bg-secondary)' }}>
-            {/* Left Panel: Session Selection */}
+            {/* Left Panel: Project Selection */}
             <div style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '15px', borderRight: '1px solid #444', paddingRight: '20px' }}>
-                <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem' }}>📂 Pilih Sesi (Max 5)</h2>
+                <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem' }}>📂 Pilih Proyek (Max 5)</h2>
                 <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {loading ? (
                         <div style={{ color: '#888' }}>Loading...</div>
-                    ) : sessions.length === 0 ? (
-                        <div style={{ color: '#888' }}>Belum ada sesi tersimpan.</div>
+                    ) : projects.length === 0 ? (
+                        <div style={{ color: '#888' }}>Belum ada proyek tersimpan.</div>
                     ) : (
-                        sessions.map(session => (
+                        projects.map(project => (
                             <div
-                                key={session.id}
-                                onClick={() => toggleSessionSelection(session.id)}
+                                key={project.id}
+                                onClick={() => toggleProjectSelection(project.id)}
                                 style={{
                                     padding: '10px',
-                                    backgroundColor: selectedSessionIds.includes(session.id) ? 'var(--accent-blue)' : '#333',
+                                    backgroundColor: selectedProjectIds.includes(project.id) ? 'var(--accent-blue)' : '#333',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
                                     border: '1px solid #555',
@@ -93,10 +94,10 @@ function ComparisonDashboard() {
                                 }}
                             >
                                 <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>
-                                    {session.videoName}
+                                    {project.projectName || project.videoName || 'Untitled'}
                                 </div>
                                 <div style={{ fontSize: '0.8rem', color: '#ccc' }}>
-                                    {new Date(session.timestamp).toLocaleString()}
+                                    {new Date(project.lastModified).toLocaleString()}
                                 </div>
                             </div>
                         ))
@@ -119,9 +120,9 @@ function ComparisonDashboard() {
                     )}
                 </div>
 
-                {selectedSessionIds.length === 0 ? (
+                {selectedProjectIds.length === 0 ? (
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', border: '2px dashed #444', borderRadius: '8px' }}>
-                        Pilih sesi di sebelah kiri untuk melihat perbandingan.
+                        Pilih proyek di sebelah kiri untuk melihat perbandingan.
                     </div>
                 ) : (
                     <>
@@ -131,7 +132,7 @@ function ComparisonDashboard() {
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', color: '#ddd' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid #444', textAlign: 'left' }}>
-                                        <th style={{ padding: '8px' }}>Sesi</th>
+                                        <th style={{ padding: '8px' }}>Proyek</th>
                                         <th style={{ padding: '8px' }}>Total Waktu</th>
                                         <th style={{ padding: '8px', color: '#4da6ff' }}>Value Added</th>
                                         <th style={{ padding: '8px', color: '#ffd700' }}>Non-VA</th>
