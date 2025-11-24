@@ -1,5 +1,6 @@
 import React from 'react';
 import { PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import ProjectGanttChart from './ProjectGanttChart';
 
 function AnalysisDashboard({ measurements = [] }) {
     if (measurements.length === 0) {
@@ -145,101 +146,8 @@ function AnalysisDashboard({ measurements = [] }) {
 
             {/* Gantt Chart */}
             <div style={{ backgroundColor: '#1a1a1a', padding: '15px', borderRadius: '8px', border: '1px solid #333' }}>
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: '#fff' }}>📅 Gantt Chart - Timeline Elemen</h3>
-                <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '500px' }}>
-                    <div style={{ minWidth: '800px', position: 'relative' }}>
-                        {/* Timeline Header */}
-                        <div style={{ display: 'flex', marginBottom: '10px', paddingLeft: '200px', borderBottom: '1px solid #444', paddingBottom: '5px' }}>
-                            <div style={{ flex: 1, fontSize: '0.75rem', color: '#888', textAlign: 'center' }}>
-                                Timeline (0s - {totalTime.toFixed(2)}s)
-                            </div>
-                        </div>
-
-                        {/* Gantt Rows */}
-                        {measurements.map((element, index) => {
-                            const startPercent = (element.startTime / totalTime) * 100;
-                            const widthPercent = (element.duration / totalTime) * 100;
-                            const categoryColor = element.category === 'Value-added' ? '#005a9e' :
-                                element.category === 'Non value-added' ? '#bfa900' : '#c50f1f';
-
-                            return (
-                                <div key={element.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', minHeight: '32px' }}>
-                                    {/* Element Name */}
-                                    <div style={{
-                                        width: '200px',
-                                        fontSize: '0.8rem',
-                                        color: '#fff',
-                                        paddingRight: '10px',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap'
-                                    }} title={element.elementName}>
-                                        {index + 1}. {element.elementName}
-                                    </div>
-
-                                    {/* Timeline Bar Container */}
-                                    <div style={{
-                                        flex: 1,
-                                        position: 'relative',
-                                        height: '28px',
-                                        backgroundColor: '#0a0a0a',
-                                        borderRadius: '4px',
-                                        border: '1px solid #333'
-                                    }}>
-                                        {/* Timeline Bar */}
-                                        <div style={{
-                                            position: 'absolute',
-                                            left: `${startPercent}%`,
-                                            width: `${widthPercent}%`,
-                                            height: '100%',
-                                            backgroundColor: categoryColor,
-                                            borderRadius: '3px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontSize: '0.7rem',
-                                            color: '#fff',
-                                            fontWeight: 'bold',
-                                            overflow: 'hidden',
-                                            cursor: 'pointer',
-                                            transition: 'opacity 0.2s'
-                                        }}
-                                            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                                            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                                            title={`${element.elementName}\nStart: ${element.startTime.toFixed(2)}s\nEnd: ${element.endTime.toFixed(2)}s\nDuration: ${element.duration.toFixed(2)}s\nCategory: ${element.category}`}
-                                        >
-                                            {widthPercent > 8 && `${element.duration.toFixed(1)}s`}
-                                        </div>
-
-                                        {/* Time Markers (every 25%) */}
-                                        {[25, 50, 75].map(percent => (
-                                            <div key={percent} style={{
-                                                position: 'absolute',
-                                                left: `${percent}%`,
-                                                top: 0,
-                                                bottom: 0,
-                                                width: '1px',
-                                                backgroundColor: '#333',
-                                                pointerEvents: 'none'
-                                            }} />
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })}
-
-                        {/* Time Scale */}
-                        <div style={{ display: 'flex', marginTop: '10px', paddingLeft: '200px', borderTop: '1px solid #444', paddingTop: '5px' }}>
-                            <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#666' }}>
-                                <span>0s</span>
-                                <span>{(totalTime * 0.25).toFixed(1)}s</span>
-                                <span>{(totalTime * 0.5).toFixed(1)}s</span>
-                                <span>{(totalTime * 0.75).toFixed(1)}s</span>
-                                <span>{totalTime.toFixed(1)}s</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: '#fff' }}>Standard Work Combination</h3>
+                <ProjectGanttChart measurements={measurements} />
             </div>
         </div>
     );

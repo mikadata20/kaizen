@@ -16,8 +16,10 @@ import SessionManager from './components/SessionManager';
 import NewProjectDialog from './components/NewProjectDialog';
 import OpenProjectDialog from './components/OpenProjectDialog';
 import Login from './components/Login';
+import StandardWorkCombinationSheet from './components/StandardWorkCombinationSheet';
 import { saveProject, getProjectByName, updateProject } from './utils/database';
 import { importProject } from './utils/projectExport';
+import { LanguageProvider } from './i18n/LanguageContext';
 import './index.css';
 
 function App() {
@@ -49,6 +51,10 @@ function App() {
   };
 
   const handleFeatureSelect = (category, feature) => {
+    if (feature === 'Standard Work Combination Sheet') {
+      setCurrentView('swcs');
+      return;
+    }
     setSelectedFeature({ category, feature });
   };
 
@@ -181,127 +187,133 @@ function App() {
   }
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'row', backgroundColor: 'var(--bg-primary)', position: 'relative' }}>
-      <div className="main-content" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {currentView === 'dashboard' ? (
-          <div className="workspace-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '10px', gap: '10px' }}>
-            <VideoWorkspace
-              measurements={measurements}
-              onUpdateMeasurements={setMeasurements}
-              videoSrc={videoSrc}
-              onVideoChange={setVideoSrc}
-              videoName={videoName}
-              onVideoNameChange={setVideoName}
-              currentProject={currentProject}
-              onNewProject={() => setShowNewProjectDialog(true)}
-              onOpenProject={() => setShowOpenProjectDialog(true)}
-              onExportProject={handleExportProject}
-              onImportProject={handleImportProject}
-              onLogout={handleLogout}
-            />
-          </div>
-        ) : currentView === 'features' ? (
-          <FeatureMenu onFeatureSelect={handleFeatureSelect} />
-        ) : currentView === 'analysis' ? (
-          <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
-            <AnalysisDashboard measurements={measurements} />
-          </div>
-        ) : currentView === 'rearrangement' ? (
-          <div style={{ flex: 1, padding: '10px', overflow: 'hidden' }}>
-            <ElementRearrangement measurements={measurements} onUpdateMeasurements={setMeasurements} videoSrc={videoSrc} />
-          </div>
-        ) : currentView === 'cycle-analysis' ? (
-          <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
-            <CycleTimeAnalysis />
-          </div>
-        ) : currentView === 'aggregation' ? (
-          <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
-            <CycleAggregation measurements={measurements} />
-          </div>
-        ) : currentView === 'standard-time' ? (
-          <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
-            <StandardTime measurements={measurements} />
-          </div>
-        ) : currentView === 'waste-elimination' ? (
-          <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
-            <WasteElimination measurements={measurements} onUpdateMeasurements={setMeasurements} />
-          </div>
-        ) : currentView === 'best-worst' ? (
-          <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
-            <BestWorstCycle measurements={measurements} />
-          </div>
-        ) : currentView === 'video-comparison' ? (
-          <div style={{ flex: 1, padding: '10px', overflow: 'hidden' }}>
-            <VideoComparison />
-          </div>
-        ) : currentView === 'help' ? (
-          <div style={{ flex: 1, overflow: 'hidden' }}>
-            <Help />
-          </div>
-        ) : currentView === 'spaghetti' ? (
-          <div style={{ flex: 1, overflow: 'hidden' }}>
-            <TherbligAnalysis measurements={measurements} />
-          </div>
-        ) : (
-          <div style={{ flex: 1, display: 'flex', gap: '10px', padding: '10px' }}>
-            <div style={{ flex: 1, maxWidth: '400px' }}>
-              <FeatureMenu onFeatureSelect={handleFeatureSelect} />
+    <LanguageProvider>
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'row', backgroundColor: 'var(--bg-primary)', position: 'relative' }}>
+        <div className="main-content" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          {currentView === 'dashboard' ? (
+            <div className="workspace-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '10px', gap: '10px' }}>
+              <VideoWorkspace
+                measurements={measurements}
+                onUpdateMeasurements={setMeasurements}
+                videoSrc={videoSrc}
+                onVideoChange={setVideoSrc}
+                videoName={videoName}
+                onVideoNameChange={setVideoName}
+                currentProject={currentProject}
+                onNewProject={() => setShowNewProjectDialog(true)}
+                onOpenProject={() => setShowOpenProjectDialog(true)}
+                onExportProject={handleExportProject}
+                onImportProject={handleImportProject}
+                onLogout={handleLogout}
+              />
             </div>
-            <div style={{ flex: 2, backgroundColor: 'var(--bg-secondary)', padding: '20px', overflowY: 'auto' }}>
-              {selectedFeature ? (
-                <div>
-                  <h2 style={{ color: 'var(--accent-blue)', marginTop: 0 }}>{selectedFeature.category}</h2>
-                  <h3 style={{ color: 'var(--text-primary)' }}>{selectedFeature.feature}</h3>
-                  <p style={{ color: 'var(--text-secondary)' }}>
-                    Fitur ini akan diimplementasikan. Silakan pilih fitur lain dari menu.
-                  </p>
-                </div>
-              ) : (
-                <div style={{ color: 'var(--text-secondary)', textAlign: 'center', marginTop: '50px' }}>
-                  <h3>Selamat Datang di Menu Fitur</h3>
-                  <p>Pilih kategori dan fitur dari menu di sebelah kiri untuk melihat detail.</p>
-                </div>
-              )}
+          ) : currentView === 'features' ? (
+            <FeatureMenu onFeatureSelect={handleFeatureSelect} />
+          ) : currentView === 'analysis' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <AnalysisDashboard measurements={measurements} />
             </div>
-          </div>
-        )}
-      </div>
+          ) : currentView === 'rearrangement' ? (
+            <div style={{ flex: 1, padding: '10px', overflow: 'hidden' }}>
+              <ElementRearrangement measurements={measurements} onUpdateMeasurements={setMeasurements} videoSrc={videoSrc} />
+            </div>
+          ) : currentView === 'cycle-analysis' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <CycleTimeAnalysis />
+            </div>
+          ) : currentView === 'swcs' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <StandardWorkCombinationSheet />
+            </div>
+          ) : currentView === 'aggregation' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <CycleAggregation measurements={measurements} />
+            </div>
+          ) : currentView === 'standard-time' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <StandardTime measurements={measurements} />
+            </div>
+          ) : currentView === 'waste-elimination' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <WasteElimination measurements={measurements} onUpdateMeasurements={setMeasurements} />
+            </div>
+          ) : currentView === 'best-worst' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <BestWorstCycle measurements={measurements} />
+            </div>
+          ) : currentView === 'video-comparison' ? (
+            <div style={{ flex: 1, padding: '10px', overflow: 'hidden' }}>
+              <VideoComparison />
+            </div>
+          ) : currentView === 'help' ? (
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <Help />
+            </div>
+          ) : currentView === 'spaghetti' ? (
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <TherbligAnalysis measurements={measurements} />
+            </div>
+          ) : (
+            <div style={{ flex: 1, display: 'flex', gap: '10px', padding: '10px' }}>
+              <div style={{ flex: 1, maxWidth: '400px' }}>
+                <FeatureMenu onFeatureSelect={handleFeatureSelect} />
+              </div>
+              <div style={{ flex: 2, backgroundColor: 'var(--bg-secondary)', padding: '20px', overflowY: 'auto' }}>
+                {selectedFeature ? (
+                  <div>
+                    <h2 style={{ color: 'var(--accent-blue)', marginTop: 0 }}>{selectedFeature.category}</h2>
+                    <h3 style={{ color: 'var(--text-primary)' }}>{selectedFeature.feature}</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>
+                      Fitur ini akan diimplementasikan. Silakan pilih fitur lain dari menu.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ color: 'var(--text-secondary)', textAlign: 'center', marginTop: '50px' }}>
+                    <h3>Selamat Datang di Menu Fitur</h3>
+                    <p>Pilih kategori dan fitur dari menu di sebelah kiri untuk melihat detail.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
-      <Header
-        videoName={videoName}
-        onUpload={(file) => {
-          const url = URL.createObjectURL(file);
-          setVideoSrc(url);
-          setVideoName(file.name);
-        }}
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        onOpenSessionManager={() => setShowSessionManager(true)}
-        theme={theme}
-        toggleTheme={toggleTheme}
-      />
-
-      {/* Session Manager Modal */}
-      {showSessionManager && (
-        <SessionManager
-          onLoadSession={handleLoadSession}
-          onClose={() => setShowSessionManager(false)}
+        <Header
+          videoName={videoName}
+          onUpload={(file) => {
+            const url = URL.createObjectURL(file);
+            setVideoSrc(url);
+            setVideoName(file.name);
+          }}
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          onOpenSessionManager={() => setShowSessionManager(true)}
+          theme={theme}
+          toggleTheme={toggleTheme}
         />
-      )}
 
-      {/* Project Management Dialogs */}
-      <NewProjectDialog
-        isOpen={showNewProjectDialog}
-        onClose={() => setShowNewProjectDialog(false)}
-        onSubmit={handleNewProject}
-      />
+        {/* Session Manager Modal */}
+        {showSessionManager && (
+          <SessionManager
+            onLoadSession={handleLoadSession}
+            onClose={() => setShowSessionManager(false)}
+          />
+        )}
 
-      <OpenProjectDialog
-        isOpen={showOpenProjectDialog}
-        onClose={() => setShowOpenProjectDialog(false)}
-        onOpenProject={handleOpenProject}
-      />
-    </div>
+        {/* Project Management Dialogs */}
+        <NewProjectDialog
+          isOpen={showNewProjectDialog}
+          onClose={() => setShowNewProjectDialog(false)}
+          onSubmit={handleNewProject}
+        />
+
+        <OpenProjectDialog
+          isOpen={showOpenProjectDialog}
+          onClose={() => setShowOpenProjectDialog(false)}
+          onOpenProject={handleOpenProject}
+        />
+      </div>
+    </LanguageProvider>
   );
 }
 

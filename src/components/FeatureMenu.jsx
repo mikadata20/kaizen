@@ -53,7 +53,8 @@ function FeatureMenu({ onFeatureSelect }) {
             'Clipboard (Image/Text/Wide Screen)',
             'Excel File Output (Element Name, Element Time, Comparative Value)',
             'Information Registration (Comment/Link/Narration)',
-            'Category Group Selection'
+            'Category Group Selection',
+            'Standard Work Combination Sheet'
         ],
         'Analysis Explorer': [
             'Analysis Data Search (Category Search, Full-text Search)',

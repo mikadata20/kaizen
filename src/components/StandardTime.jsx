@@ -1,43 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { getAllSessions } from '../utils/database';
+import { getAllProjects } from '../utils/database';
 import { exportStandardTimeToExcel } from '../utils/excelExport';
 
 function StandardTime() {
-    const [sessions, setSessions] = useState([]);
-    const [selectedSessionIds, setSelectedSessionIds] = useState([]);
+    const [projects, setProjects] = useState([]);
+    const [selectedProjectIds, setSelectedProjectIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [elementData, setElementData] = useState([]);
     const [globalAllowance, setGlobalAllowance] = useState(15); // Default 15%
     const [globalRating, setGlobalRating] = useState(100); // Default 100%
 
     useEffect(() => {
-        loadSessions();
+        loadProjects();
     }, []);
 
     useEffect(() => {
-        if (selectedSessionIds.length > 0) {
+        if (selectedProjectIds.length > 0) {
             calculateBaseData();
         } else {
             setElementData([]);
         }
-    }, [selectedSessionIds, sessions]);
+    }, [selectedProjectIds, projects]);
 
-    const loadSessions = async () => {
+    const loadProjects = async () => {
         try {
-            const allSessions = await getAllSessions();
-            allSessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            setSessions(allSessions);
+            const allProjects = await getAllProjects();
+            allProjects.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+            setProjects(allProjects);
         } catch (error) {
-            console.error('Error loading sessions:', error);
+            console.error('Error loading projects:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const toggleSessionSelection = (id) => {
-        setSelectedSessionIds(prev => {
+    const toggleProjectSelection = (id) => {
+        setSelectedProjectIds(prev => {
             if (prev.includes(id)) {
-                return prev.filter(sessionId => sessionId !== id);
+                return prev.filter(projectId => projectId !== id);
             } else {
                 return [...prev, id];
             }
@@ -45,31 +45,33 @@ function StandardTime() {
     };
 
     const calculateBaseData = () => {
-        const selectedSessions = sessions.filter(s => selectedSessionIds.includes(s.id));
-        if (selectedSessions.length === 0) return;
+        const selectedProjects = projects.filter(p => selectedProjectIds.includes(p.id));
+        if (selectedProjects.length === 0) return;
 
         const elementGroups = {};
 
-        selectedSessions.forEach(session => {
-            session.measurements.forEach(m => {
-                if (!elementGroups[m.elementName]) {
-                    elementGroups[m.elementName] = {
-                        name: m.elementName,
-                        category: m.category,
-                        durations: [],
-                        rating: globalRating // Initialize with global rating
-                    };
-                }
-                elementGroups[m.elementName].durations.push(m.duration);
-            });
+        selectedProjects.forEach(project => {
+            if (project.measurements && project.measurements.length > 0) {
+                project.measurements.forEach(m => {
+                    if (!elementGroups[m.elementName]) {
+                        elementGroups[m.elementName] = {
+                            name: m.elementName,
+                            category: m.category,
+                            durations: [],
+                            rating: globalRating // Initialize with global rating
+                        };
+                    }
+                    elementGroups[m.elementName].durations.push(m.duration);
+                });
+            }
         });
 
         const data = Object.values(elementGroups).map(group => {
             const sum = group.durations.reduce((a, b) => a + b, 0);
             const avg = sum / group.durations.length;
 
-            // Preserve existing rating if updating (to avoid reset on session change if possible, 
-            // but here we re-calc on session change. Ideally we'd cache edits, but for now simple reset is okay 
+            // Preserve existing rating if updating (to avoid reset on project change if possible, 
+            // but here we re-calc on project change. Ideally we'd cache edits, but for now simple reset is okay 
             // or we could try to match by name from previous state)
             const existingItem = elementData.find(e => e.name === group.name);
             const rating = existingItem ? existingItem.rating : globalRating;
@@ -145,22 +147,22 @@ function StandardTime() {
                     </div>
                 </div>
 
-                {/* Session Selection */}
+                {/* Project Selection */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem' }}>📂 Pilih Sesi (Sumber Data)</h3>
+                    <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem' }}>📂 Pilih Project (Sumber Data)</h3>
                     <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {loading ? (
                             <div style={{ color: '#888' }}>Loading...</div>
-                        ) : sessions.length === 0 ? (
-                            <div style={{ color: '#888' }}>Belum ada sesi tersimpan.</div>
+                        ) : projects.length === 0 ? (
+                            <div style={{ color: '#888' }}>Belum ada project tersimpan.</div>
                         ) : (
-                            sessions.map(session => (
+                            projects.map(project => (
                                 <div
-                                    key={session.id}
-                                    onClick={() => toggleSessionSelection(session.id)}
+                                    key={project.id}
+                                    onClick={() => toggleProjectSelection(project.id)}
                                     style={{
                                         padding: '10px',
-                                        backgroundColor: selectedSessionIds.includes(session.id) ? 'var(--accent-blue)' : '#333',
+                                        backgroundColor: selectedProjectIds.includes(project.id) ? 'var(--accent-blue)' : '#333',
                                         borderRadius: '6px',
                                         cursor: 'pointer',
                                         border: '1px solid #555',
@@ -172,13 +174,13 @@ function StandardTime() {
                                 >
                                     <div>
                                         <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>
-                                            {session.videoName}
+                                            {project.projectName}
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: '#ccc' }}>
-                                            {new Date(session.timestamp).toLocaleString()}
+                                            {new Date(project.lastModified).toLocaleString()}
                                         </div>
                                     </div>
-                                    {selectedSessionIds.includes(session.id) && <span style={{ color: '#fff' }}>✓</span>}
+                                    {selectedProjectIds.includes(project.id) && <span style={{ color: '#fff' }}>✓</span>}
                                 </div>
                             ))
                         )}
@@ -208,9 +210,9 @@ function StandardTime() {
                     </div>
                 </div>
 
-                {selectedSessionIds.length === 0 ? (
+                {selectedProjectIds.length === 0 ? (
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', border: '2px dashed #444', borderRadius: '8px' }}>
-                        Pilih sesi di sebelah kiri untuk memulai perhitungan.
+                        Pilih project di sebelah kiri untuk memulai perhitungan.
                     </div>
                 ) : (
                     <div style={{ backgroundColor: '#1a1a1a', padding: '15px', borderRadius: '8px', border: '1px solid #333', overflowX: 'auto' }}>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getAllProjects, deleteProject } from '../utils/database';
 import { exportProject } from '../utils/projectExport';
+import { useLanguage } from '../i18n/LanguageContext';
 
 function OpenProjectDialog({ isOpen, onClose, onOpenProject }) {
+    const { t } = useLanguage();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -89,7 +91,7 @@ function OpenProjectDialog({ isOpen, onClose, onOpenProject }) {
                 border: '1px solid #333'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2 style={{ margin: 0, color: 'white' }}>Buka Proyek</h2>
+                    <h2 style={{ margin: 0, color: 'white' }}>{t('project.openProject')}</h2>
                     <button
                         onClick={onClose}
                         style={{
@@ -106,11 +108,11 @@ function OpenProjectDialog({ isOpen, onClose, onOpenProject }) {
 
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
-                        Memuat proyek...
+                        {t('common.loading')}
                     </div>
                 ) : projects.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
-                        Belum ada proyek tersimpan
+                        {t('project.noProjects')}
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gap: '15px' }}>
@@ -143,7 +145,7 @@ function OpenProjectDialog({ isOpen, onClose, onOpenProject }) {
                                             Dibuat: {formatDate(project.createdAt)}
                                         </div>
                                         <div style={{ fontSize: '0.75rem', color: '#666' }}>
-                                            Terakhir diubah: {formatDate(project.lastModified)}
+                                            {t('project.lastModified')}: {formatDate(project.lastModified)}
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -159,7 +161,7 @@ function OpenProjectDialog({ isOpen, onClose, onOpenProject }) {
                                                 fontSize: '0.9rem'
                                             }}
                                         >
-                                            Buka
+                                            {t('common.open')}
                                         </button>
                                         <button
                                             onClick={(e) => handleExport(project, e)}

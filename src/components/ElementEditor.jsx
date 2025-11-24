@@ -12,6 +12,9 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
     const [editCategory, setEditCategory] = useState('');
     const [editTherblig, setEditTherblig] = useState('');
     const [editCycle, setEditCycle] = useState(1);
+    const [editManual, setEditManual] = useState(0);
+    const [editAuto, setEditAuto] = useState(0);
+    const [editWalk, setEditWalk] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
     const [filterTherblig, setFilterTherblig] = useState('all');
@@ -87,6 +90,9 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
         setEditCategory(element.category);
         setEditTherblig(element.therblig || '');
         setEditCycle(element.cycle || 1);
+        setEditManual(element.manualTime || 0);
+        setEditAuto(element.autoTime || 0);
+        setEditWalk(element.walkTime || 0);
         setEditStartTime(element.startTime);
         setEditEndTime(element.endTime);
     };
@@ -105,12 +111,28 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
             return;
         }
 
+        const manual = parseFloat(editManual) || 0;
+        const auto = parseFloat(editAuto) || 0;
+        const walk = parseFloat(editWalk) || 0;
+        const duration = endTime - startTime;
+        const totalSplit = manual + auto + walk;
+
+        // Check if total split equals duration (with small tolerance for floating point errors)
+        // Skip check if total split is 0 (user hasn't entered breakdown yet)
+        if (totalSplit > 0 && Math.abs(totalSplit - duration) > 0.01) {
+            alert(`Total waktu Manual (${manual.toFixed(2)}) + Auto (${auto.toFixed(2)}) + Walk (${walk.toFixed(2)}) = ${totalSplit.toFixed(2)}s\nHarus sama dengan durasi elemen (${duration.toFixed(2)}s)!`);
+            return;
+        }
+
         onUpdateMeasurements(measurements.map(m => m.id === editingId ? {
             ...m,
             elementName: editName,
             category: editCategory,
             therblig: editTherblig,
             cycle: parseInt(editCycle) || 1,
+            manualTime: parseFloat(editManual) || 0,
+            autoTime: parseFloat(editAuto) || 0,
+            walkTime: parseFloat(editWalk) || 0,
             startTime: startTime,
             endTime: endTime,
             duration: endTime - startTime
@@ -124,6 +146,9 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
         setEditCategory('');
         setEditTherblig('');
         setEditCycle(1);
+        setEditManual(0);
+        setEditAuto(0);
+        setEditWalk(0);
         setEditStartTime(0);
         setEditEndTime(0);
     };
@@ -275,13 +300,16 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
             )}
 
             <div style={{ flex: 1, overflow: 'auto', backgroundColor: '#1a1a1a', borderRadius: '6px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', color: '#fff', fontSize: '0.85rem' }}>
+                <table style={{ width: '100%', minWidth: '1000px', borderCollapse: 'collapse', color: '#fff', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                     <thead style={{ position: 'sticky', top: 0, backgroundColor: '#333', zIndex: 1 }}>
                         <tr>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '40px', fontSize: '0.7rem' }}>No.</th>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '60px', fontSize: '0.7rem' }}>Cycle</th>
                             <th style={{ padding: '4px', border: '1px solid #444', fontSize: '0.7rem' }}>Proses</th>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '150px', fontSize: '0.7rem' }}>Kategori</th>
+                            <th style={{ padding: '4px', border: '1px solid #444', width: '60px', fontSize: '0.7rem', color: '#ffd700' }}>Manual</th>
+                            <th style={{ padding: '4px', border: '1px solid #444', width: '60px', fontSize: '0.7rem', color: '#00ff00' }}>Auto</th>
+                            <th style={{ padding: '4px', border: '1px solid #444', width: '60px', fontSize: '0.7rem', color: '#ff4d4d' }}>Walk</th>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '120px', fontSize: '0.7rem' }}>Therblig</th>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '120px', fontSize: '0.7rem' }}>Rating</th>
                             <th style={{ padding: '4px', border: '1px solid #444', width: '70px', fontSize: '0.7rem' }}>Start (s)</th>
@@ -339,6 +367,54 @@ function ElementEditor({ measurements = [], videoName = 'Untitled', onUpdateMeas
                                                 </select>
                                             ) : (
                                                 <span style={{ display: 'inline-block', padding: '3px 8px', backgroundColor: getCategoryColor(el.category), borderRadius: '3px', fontSize: '0.8rem' }}>{el.category}</span>
+                                            )}
+                                        </td>
+                                        <td
+                                            onClick={() => editingId !== el.id && handleStartEdit(el)}
+                                            style={{ padding: '6px', border: '1px solid #444', textAlign: 'center', cursor: editingId !== el.id ? 'pointer' : 'default' }}
+                                        >
+                                            {editingId === el.id ? (
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={editManual}
+                                                    onChange={(e) => setEditManual(e.target.value)}
+                                                    style={{ width: '100%', padding: '4px', backgroundColor: '#222', border: '1px solid #555', color: '#ffd700', fontSize: '0.85rem', textAlign: 'center' }}
+                                                />
+                                            ) : (
+                                                <span style={{ color: '#ffd700' }}>{el.manualTime ? el.manualTime.toFixed(2) : '-'}</span>
+                                            )}
+                                        </td>
+                                        <td
+                                            onClick={() => editingId !== el.id && handleStartEdit(el)}
+                                            style={{ padding: '6px', border: '1px solid #444', textAlign: 'center', cursor: editingId !== el.id ? 'pointer' : 'default' }}
+                                        >
+                                            {editingId === el.id ? (
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={editAuto}
+                                                    onChange={(e) => setEditAuto(e.target.value)}
+                                                    style={{ width: '100%', padding: '4px', backgroundColor: '#222', border: '1px solid #555', color: '#00ff00', fontSize: '0.85rem', textAlign: 'center' }}
+                                                />
+                                            ) : (
+                                                <span style={{ color: '#00ff00' }}>{el.autoTime ? el.autoTime.toFixed(2) : '-'}</span>
+                                            )}
+                                        </td>
+                                        <td
+                                            onClick={() => editingId !== el.id && handleStartEdit(el)}
+                                            style={{ padding: '6px', border: '1px solid #444', textAlign: 'center', cursor: editingId !== el.id ? 'pointer' : 'default' }}
+                                        >
+                                            {editingId === el.id ? (
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={editWalk}
+                                                    onChange={(e) => setEditWalk(e.target.value)}
+                                                    style={{ width: '100%', padding: '4px', backgroundColor: '#222', border: '1px solid #555', color: '#ff4d4d', fontSize: '0.85rem', textAlign: 'center' }}
+                                                />
+                                            ) : (
+                                                <span style={{ color: '#ff4d4d' }}>{el.walkTime ? el.walkTime.toFixed(2) : '-'}</span>
                                             )}
                                         </td>
                                         <td

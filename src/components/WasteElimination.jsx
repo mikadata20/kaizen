@@ -1,42 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { getAllSessions } from '../utils/database';
+import { getAllProjects } from '../utils/database';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 
 function WasteElimination() {
-    const [sessions, setSessions] = useState([]);
-    const [selectedSessionId, setSelectedSessionId] = useState(null);
+    const [projects, setProjects] = useState([]);
+    const [selectedProjectId, setSelectedProjectId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [analysisData, setAnalysisData] = useState(null);
 
     useEffect(() => {
-        loadSessions();
+        loadProjects();
     }, []);
 
     useEffect(() => {
-        if (selectedSessionId) {
+        if (selectedProjectId) {
             calculateWasteElimination();
         } else {
             setAnalysisData(null);
         }
-    }, [selectedSessionId, sessions]);
+    }, [selectedProjectId, projects]);
 
-    const loadSessions = async () => {
+    const loadProjects = async () => {
         try {
-            const allSessions = await getAllSessions();
-            allSessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            setSessions(allSessions);
+            const allProjects = await getAllProjects();
+            allProjects.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+            setProjects(allProjects);
         } catch (error) {
-            console.error('Error loading sessions:', error);
+            console.error('Error loading projects:', error);
         } finally {
             setLoading(false);
         }
     };
 
     const calculateWasteElimination = () => {
-        const session = sessions.find(s => s.id === selectedSessionId);
-        if (!session) return;
+        const project = projects.find(p => p.id === selectedProjectId);
+        if (!project || !project.measurements || project.measurements.length === 0) return;
 
-        const measurements = session.measurements;
+        const measurements = project.measurements;
 
         // Calculate Before (with waste)
         const totalTime = measurements.reduce((sum, m) => sum + m.duration, 0);
@@ -58,7 +58,7 @@ function WasteElimination() {
         const vaImprovement = vaPercentAfter - vaPercent;
 
         setAnalysisData({
-            sessionName: session.videoName,
+            projectName: project.projectName,
             before: {
                 total: totalTime,
                 va: vaTime,
@@ -99,22 +99,22 @@ function WasteElimination() {
 
     return (
         <div style={{ height: '100%', display: 'flex', gap: '20px', padding: '20px', backgroundColor: 'var(--bg-secondary)' }}>
-            {/* Left Panel: Session Selection */}
+            {/* Left Panel: Project Selection */}
             <div style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '15px', borderRight: '1px solid #444', paddingRight: '20px' }}>
-                <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem' }}>📂 Pilih Sesi</h2>
+                <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem' }}>📂 Pilih Project</h2>
                 <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {loading ? (
                         <div style={{ color: '#888' }}>Loading...</div>
-                    ) : sessions.length === 0 ? (
-                        <div style={{ color: '#888' }}>Belum ada sesi tersimpan.</div>
+                    ) : projects.length === 0 ? (
+                        <div style={{ color: '#888' }}>Belum ada project tersimpan.</div>
                     ) : (
-                        sessions.map(session => (
+                        projects.map(project => (
                             <div
-                                key={session.id}
-                                onClick={() => setSelectedSessionId(session.id)}
+                                key={project.id}
+                                onClick={() => setSelectedProjectId(project.id)}
                                 style={{
                                     padding: '10px',
-                                    backgroundColor: selectedSessionId === session.id ? 'var(--accent-blue)' : '#333',
+                                    backgroundColor: selectedProjectId === project.id ? 'var(--accent-blue)' : '#333',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
                                     border: '1px solid #555',
@@ -122,10 +122,10 @@ function WasteElimination() {
                                 }}
                             >
                                 <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>
-                                    {session.videoName}
+                                    {project.projectName}
                                 </div>
                                 <div style={{ fontSize: '0.8rem', color: '#ccc' }}>
-                                    {new Date(session.timestamp).toLocaleString()}
+                                    {new Date(project.lastModified).toLocaleString()}
                                 </div>
                             </div>
                         ))
@@ -139,7 +139,7 @@ function WasteElimination() {
 
                 {!analysisData ? (
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', border: '2px dashed #444', borderRadius: '8px' }}>
-                        Pilih sesi di sebelah kiri untuk melihat simulasi.
+                        Pilih project di sebelah kiri untuk melihat simulasi.
                     </div>
                 ) : (
                     <>

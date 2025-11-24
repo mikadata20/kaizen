@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { getProjectByName } from '../utils/database';
+import { useLanguage } from '../i18n/LanguageContext';
 
 function NewProjectDialog({ isOpen, onClose, onSubmit }) {
+    const { t } = useLanguage();
     const [projectName, setProjectName] = useState('');
     const [videoFile, setVideoFile] = useState(null);
     const [error, setError] = useState('');
@@ -17,19 +19,19 @@ function NewProjectDialog({ isOpen, onClose, onSubmit }) {
     const handleSubmit = async () => {
         // Validation
         if (!projectName.trim()) {
-            setError('Nama proyek tidak boleh kosong');
+            setError(t('project.errors.nameRequired'));
             return;
         }
 
         if (!videoFile) {
-            setError('Pilih file video terlebih dahulu');
+            setError(t('project.errors.videoRequired'));
             return;
         }
 
         // Check if project name already exists
         const existing = await getProjectByName(projectName.trim());
         if (existing) {
-            setError('Nama proyek sudah digunakan');
+            setError(t('project.errors.nameExists'));
             return;
         }
 
@@ -72,17 +74,17 @@ function NewProjectDialog({ isOpen, onClose, onSubmit }) {
                 maxWidth: '500px',
                 border: '1px solid #333'
             }}>
-                <h2 style={{ marginTop: 0, color: 'white' }}>Proyek Baru</h2>
+                <h2 style={{ marginTop: 0, color: 'white' }}>{t('project.newProject')}</h2>
 
                 <div style={{ marginBottom: '20px' }}>
                     <label style={{ display: 'block', marginBottom: '8px', color: '#ccc' }}>
-                        Nama Proyek *
+                        {t('project.projectName')} *
                     </label>
                     <input
                         type="text"
                         value={projectName}
                         onChange={(e) => setProjectName(e.target.value)}
-                        placeholder="Masukkan nama proyek"
+                        placeholder={t('project.enterName')}
                         style={{
                             width: '100%',
                             padding: '10px',
@@ -97,7 +99,7 @@ function NewProjectDialog({ isOpen, onClose, onSubmit }) {
 
                 <div style={{ marginBottom: '20px' }}>
                     <label style={{ display: 'block', marginBottom: '8px', color: '#ccc' }}>
-                        File Video *
+                        {t('project.videoFile')} *
                     </label>
                     <input
                         type="file"
@@ -118,7 +120,7 @@ function NewProjectDialog({ isOpen, onClose, onSubmit }) {
                             border: '1px solid #555'
                         }}
                     >
-                        📹 Pilih Video
+                        📹 {t('project.selectVideo')}
                     </label>
                     {videoFile && (
                         <div style={{ marginTop: '8px', color: '#4a9eff' }}>
@@ -151,7 +153,7 @@ function NewProjectDialog({ isOpen, onClose, onSubmit }) {
                             cursor: 'pointer'
                         }}
                     >
-                        Batal
+                        {t('common.cancel')}
                     </button>
                     <button
                         onClick={handleSubmit}
@@ -164,7 +166,7 @@ function NewProjectDialog({ isOpen, onClose, onSubmit }) {
                             cursor: 'pointer'
                         }}
                     >
-                        Buat Proyek
+                        {t('project.createProject')}
                     </button>
                 </div>
             </div>

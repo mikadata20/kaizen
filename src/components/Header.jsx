@@ -1,6 +1,10 @@
 import React from 'react';
+import LanguageSelector from './LanguageSelector';
+import { useLanguage } from '../i18n/LanguageContext';
 
 function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessionManager, theme, toggleTheme, onLogout }) {
+    const { t } = useLanguage();
+
     return (
         <header style={{
             height: '100vh',
@@ -51,7 +55,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('dashboard')}
-                        title="Video Analysis Workspace"
+                        title={t('header.video')}
                     >
                         🎬
                     </button>
@@ -68,7 +72,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('analysis')}
-                        title="Analysis Summary & Charts"
+                        title={t('header.analysis')}
                     >
                         📊
                     </button>
@@ -85,7 +89,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('rearrangement')}
-                        title="Rearrange Elements & Simulate"
+                        title={t('header.rearrange')}
                     >
                         🔄
                     </button>
@@ -102,10 +106,11 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('cycle-analysis')}
-                        title="Cycle Time Analysis"
+                        title={t('header.cycleAnalysis')}
                     >
                         📈
                     </button>
+
                     <button
                         className="btn"
                         style={{
@@ -119,9 +124,9 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('aggregation')}
-                        title="Cycle Time Aggregation"
+                        title={t('header.aggregation')}
                     >
-                        📈
+                        Σ
                     </button>
                     <button
                         className="btn"
@@ -136,7 +141,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('standard-time')}
-                        title="Standard Time Calculation"
+                        title={t('header.standardTime')}
                     >
                         ⏱️
                     </button>
@@ -153,7 +158,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('waste-elimination')}
-                        title="Waste Elimination Simulation"
+                        title={t('header.waste')}
                     >
                         🗑️
                     </button>
@@ -170,7 +175,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('spaghetti')}
-                        title="Therblig Analysis - Layout & Icons"
+                        title={t('header.therblig')}
                     >
                         📍
                     </button>
@@ -187,7 +192,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('best-worst')}
-                        title="Best vs Worst Cycle Analysis"
+                        title={t('header.bestWorst')}
                     >
                         🏆
                     </button>
@@ -204,7 +209,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('video-comparison')}
-                        title="Video Side-by-Side Comparison"
+                        title={t('header.comparison')}
                     >
                         🎥
                     </button>
@@ -221,7 +226,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => setCurrentView('help')}
-                        title="Help & User Guide"
+                        title={t('header.help')}
                     >
                         ❓
                     </button>
@@ -242,6 +247,8 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                         {theme === 'dark' ? '☀️' : '🌙'}
                     </button>
 
+                    <LanguageSelector />
+
                     <div style={{ width: '30px', height: '1px', backgroundColor: '#555', margin: '5px 0' }}></div>
 
                     <button
@@ -257,7 +264,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => document.getElementById('header-logo-upload')?.click()}
-                        title="Upload Logo/Watermark"
+                        title={t('header.uploadLogo')}
                     >
                         🎨
                     </button>
@@ -274,7 +281,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => window.dispatchEvent(new CustomEvent('screenshot'))}
-                        title="Capture Screenshot"
+                        title={t('header.screenshot')}
                     >
                         📸
                     </button>
@@ -294,7 +301,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={() => window.dispatchEvent(new CustomEvent('export-json'))}
-                        title="Export Analysis Data (JSON)"
+                        title={t('header.exportData')}
                     >
                         💾
                     </button>
@@ -311,7 +318,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                             alignItems: 'center'
                         }}
                         onClick={onOpenSessionManager}
-                        title="Manage Saved Sessions"
+                        title={t('header.sessions')}
                     >
                         📂
                     </button>

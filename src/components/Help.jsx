@@ -43,14 +43,14 @@ function Help() {
 🎬 **Video** - Workspace analisis video utama
 📊 **Analysis** - Dashboard charts & summary
 🔄 **Rearrange** - Simulasi penyusunan ulang elemen
-⚖️ **Comparison** - Bandingkan multiple sesi
-📈 **Aggregation** - Agregasi cycle time data
-⏱️ **Std Time** - Kalkulasi standard time
+📈 **Cycle Analysis** - Analisis waktu cycle individual
+Σ **Aggregation** - Agregasi cycle time dari multiple projects
+⏱️ **Std Time** - Kalkulasi standard time dengan rating & allowance
 🗑️ **Waste** - Simulasi eliminasi waste
-🍝 **Spaghetti** - Movement diagram ⭐ BARU!
-🏆 **Best/Worst** - Analisis cycle terbaik/terburuk ⭐ BARU!
-🎥 **Compare** - Video side-by-side ⭐ BARU!
-🎙️ **Narration** - Audio recording ⭐ BARU!
+📍 **Therblig** - Therblig flow diagram & layout analysis
+🏆 **Best/Worst** - Analisis cycle terbaik vs terburuk
+🎥 **Compare** - Video side-by-side comparison
+❓ **Help** - Panduan penggunaan aplikasi
 
 **Element Editor Tools:**
 
@@ -59,7 +59,7 @@ function Help() {
 🔍 - Cari elemen
 ▲/▼ - Pindah urutan
 ✎ - Edit nama & kategori
-✂️ - Split elemen ⭐ BARU!
+✂️ - Split elemen
 🗑 - Hapus elemen
             `
         },
@@ -115,6 +115,156 @@ Contoh: Rating 80% → Speed 0.8x
 Durasi otomatis dihitung ulang!
             `
         },
+        video: {
+            title: '🎬 Video Workspace',
+            content: `
+**Fungsi:**
+Workspace utama untuk analisis video dan pengukuran waktu elemen kerja.
+
+**Cara Pakai:**
+
+1. Upload video dengan klik tombol "Upload Video"
+2. Play video dan gunakan keyboard shortcuts:
+   • Space - Play/Pause
+   • S - Start measurement
+   • E - End measurement
+   • ← / → - Frame by frame
+3. Input nama elemen dan kategori (VA/NVA/Waste)
+4. Ulangi untuk semua elemen
+5. Save ke database dengan tombol 💾
+
+**Fitur:**
+• Timeline measurement dengan visual markers
+• Playback speed control (0.25x - 2x)
+• Frame-by-frame navigation
+• Element editor dengan drag & drop
+• Narration recording (opsional)
+
+**Tips:**
+• Gunakan slow motion untuk gerakan cepat
+• Frame-by-frame untuk presisi tinggi
+• Zoom in untuk detail gerakan
+            `
+        },
+        analysis: {
+            title: '📊 Analysis Dashboard',
+            content: `
+**Fungsi:**
+Dashboard visualisasi hasil analisis dengan charts dan summary statistics.
+
+**Cara Pakai:**
+
+1. Klik icon 📊 di header
+2. Pilih project dari dropdown
+3. Review charts dan metrics:
+   • Pie chart - Distribusi VA/NVA/Waste
+   • Bar chart - Durasi per elemen
+   • Timeline - Sequence visualization
+   • Summary stats - Total time, cycle time, dll
+
+**Metrics yang Ditampilkan:**
+• Total Cycle Time
+• Value Added Time & Percentage
+• Non Value Added Time & Percentage
+• Waste Time & Percentage
+• Element count per kategori
+
+**Export:**
+• Screenshot dashboard
+• Export data ke Excel
+• Export chart sebagai image
+            `
+        },
+        rearrange: {
+            title: '🔄 Rearrange & Simulate',
+            content: `
+**Fungsi:**
+Simulasi penyusunan ulang urutan elemen untuk optimasi cycle time.
+
+**Cara Pakai:**
+
+1. Klik icon 🔄 di header
+2. Pilih project dari dropdown
+3. Drag & drop elemen untuk ubah urutan
+4. Lihat perubahan cycle time secara real-time
+5. Compare before vs after
+6. Save arrangement baru jika lebih baik
+
+**Use Case:**
+• Optimasi sequence kerja
+• Eliminasi backtracking
+• Grouping aktivitas sejenis
+• Reduce setup/changeover time
+• Improve flow efficiency
+
+**Tips:**
+• Group elemen VA bersamaan
+• Minimize perpindahan antar workstation
+• Eliminate unnecessary NVA
+            `
+        },
+        cycleanalysis: {
+            title: '📈 Cycle Time Analysis',
+            content: `
+**Fungsi:**
+Analisis detail waktu cycle individual dengan breakdown per elemen.
+
+**Cara Pakai:**
+
+1. Klik icon 📈 di header
+2. Pilih project dari dropdown
+3. Review breakdown:
+   • Cycle time total
+   • Time per elemen
+   • Percentage contribution
+   • Kategori distribution
+
+**Analisis:**
+• Identifikasi elemen terlama
+• Cari opportunity improvement
+• Validasi balance antar elemen
+• Track performance metrics
+
+**Output:**
+• Detailed time breakdown table
+• Visual charts
+• Export ke Excel
+            `
+        },
+        aggregation: {
+            title: 'Σ Cycle Time Aggregation',
+            content: `
+**Fungsi:**
+Agregasi data cycle time dari multiple projects untuk analisis statistik.
+
+**Cara Pakai:**
+
+1. Klik icon Σ di header
+2. Pilih multiple projects (min 2)
+3. Review agregasi:
+   • Average time per elemen
+   • Min/Max/Std deviation
+   • Frequency distribution
+   • Outlier detection
+
+**Metrics:**
+• Mean cycle time
+• Standard deviation
+• Coefficient of variation
+• Process capability
+
+**Use Case:**
+• Validasi consistency
+• Identify variation
+• Set standard time
+• Process improvement tracking
+
+**Tips:**
+• Minimal 10 cycles untuk statistik valid
+• Remove outliers jika ada special cause
+• Track trend over time
+            `
+        },
         bestworst: {
             title: '🏆 Best/Worst Analysis',
             content: `
@@ -158,85 +308,45 @@ Bandingkan 2 video secara side-by-side dengan playback synchron.
 • Method 1 vs Method 2
             `
         },
-        spaghetti: {
-            title: '🍝 Spaghetti Chart',
+        therblig: {
+            title: '📍 Therblig Analysis',
             content: `
 **Fungsi:**
-Visualisasi diagram pergerakan (movement diagram) untuk analisis flow & layout.
+Visualisasi Therblig flow diagram untuk analisis gerakan dan layout workstation.
 
 **Cara Pakai:**
 
-1. Klik icon 🍝 di header
-2. Pilih session dari dropdown
+1. Klik icon 📍 di header
+2. Pilih project dari dropdown
 3. Chart otomatis generate dengan:
-   • Nodes (stations) dari nama elemen
-   • Paths (arrows) menunjukkan flow
-   • Colors sesuai kategori
+   • Therblig icons untuk setiap elemen
+   • Flow lines menunjukkan urutan gerakan
+   • Colors sesuai kategori (VA/NVA/Waste)
 
 **Interaksi:**
-• 🖱️ Drag nodes untuk arrange layout
-• 📏 Adjust grid size dengan slider
-• 👀 Lihat visit frequency (Nx) per station
+• 🖱️ Drag icons untuk arrange layout
+• 📏 Lihat sequence dan flow pattern
+• 🎨 Warna garis sesuai kategori elemen
 
 **Interpretasi:**
-🔵 Blue Circle = Station/Location
-➡️ Curved Arrow = Movement path
-🎨 Path Color:
-  • Blue = Value-added movement
-  • Yellow = Non value-added
-  • Red = Waste (backtracking, extra transport)
-(Nx) = Berapa kali station dikunjungi
+🔵 Blue Line = Value-added movement
+🟡 Yellow Line = Non value-added movement
+🔴 Red Line = Waste movement
 
 **Analisis:**
-✅ Identifikasi backtracking
-✅ Cari waste transport
-✅ Optimasi workstation layout
-✅ Reduce walking distance
-✅ Improve flow efficiency
+✅ Identifikasi waste movement
+✅ Optimasi sequence gerakan
+✅ Improve workstation layout
+✅ Reduce unnecessary motion
+✅ Standardize work method
 
 **Tips:**
-• Banyak garis merah = banyak waste movement
-• Crossing paths = layout kurang optimal
-• High visit count (>3x) = bottleneck station
+• Banyak garis merah = banyak waste
+• Crossing lines = layout kurang optimal
+• Sequence panjang = perlu simplifikasi
             `
         },
-        narration: {
-            title: '🎙️ Narration Recording',
-            content: `
-**Fungsi:**
-Merekam narasi audio untuk dokumentasi analisis, training material, atau catatan lisan.
 
-**Cara Pakai:**
-
-1. Buka Video Analysis workspace
-2. Scroll ke panel kanan (di bawah Element Editor)
-3. Klik 🎙️ Start Recording
-4. Allow microphone permission (browser akan minta izin)
-5. Mulai berbicara untuk record narasi
-6. Controls:
-   • ⏸ Pause - pause recording sementara
-   • ▶ Resume - lanjutkan recording
-   • ⏹ Stop - selesai recording
-7. Setelah stop, narasi tersimpan otomatis
-
-**Playback & Management:**
-• ▶ Play Narration - dengar hasil recording
-• 🔄 Re-record - rekam ulang jika tidak puas
-• 🗑 Delete - hapus narration
-
-**Tips:**
-• Rekam di lingkungan tenang untuk kualitas audio terbaik
-• Gunakan external microphone untuk hasil lebih baik
-• Narasi disimpan sebagai base64 di database session
-• Cocok untuk training material atau presentasi
-
-**Use Cases:**
-✅ Training operator dengan voice-over
-✅ Dokumentasi improvement dengan penjelasan
-✅ Review session dengan catatan lisan
-✅ Presentation project dengan narasi
-            `
-        },
         stdtime: {
             title: '⏱️ Standard Time',
             content: `

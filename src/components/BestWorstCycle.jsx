@@ -1,40 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { getAllSessions } from '../utils/database';
+import { getAllProjects } from '../utils/database';
 
 function BestWorstCycle() {
-    const [sessions, setSessions] = useState([]);
-    const [selectedSessionIds, setSelectedSessionIds] = useState([]);
+    const [projects, setProjects] = useState([]);
+    const [selectedProjectIds, setSelectedProjectIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [analysis, setAnalysis] = useState(null);
 
     useEffect(() => {
-        loadSessions();
+        loadProjects();
     }, []);
 
     useEffect(() => {
-        if (selectedSessionIds.length >= 2) {
+        if (selectedProjectIds.length >= 2) {
             performAnalysis();
         } else {
             setAnalysis(null);
         }
-    }, [selectedSessionIds, sessions]);
+    }, [selectedProjectIds, projects]);
 
-    const loadSessions = async () => {
+    const loadProjects = async () => {
         try {
-            const allSessions = await getAllSessions();
-            allSessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            setSessions(allSessions);
+            const allProjects = await getAllProjects();
+            allProjects.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+            setProjects(allProjects);
         } catch (error) {
-            console.error('Error loading sessions:', error);
+            console.error('Error loading projects:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const toggleSessionSelection = (id) => {
-        setSelectedSessionIds(prev => {
+    const toggleProjectSelection = (id) => {
+        setSelectedProjectIds(prev => {
             if (prev.includes(id)) {
-                return prev.filter(sessionId => sessionId !== id);
+                return prev.filter(projectId => projectId !== id);
             } else {
                 return [...prev, id];
             }
@@ -42,12 +42,20 @@ function BestWorstCycle() {
     };
 
     const performAnalysis = () => {
-        const selectedSessions = sessions.filter(s => selectedSessionIds.includes(s.id));
+        const selectedProjects = projects.filter(p => selectedProjectIds.includes(p.id));
 
-        // Calculate total time for each session
-        const cyclesWithTime = selectedSessions.map(session => ({
-            ...session,
-            totalTime: session.measurements.reduce((sum, m) => sum + m.duration, 0)
+        // Filter out projects without measurements
+        const validProjects = selectedProjects.filter(p => p.measurements && p.measurements.length > 0);
+
+        if (validProjects.length < 2) {
+            setAnalysis(null);
+            return;
+        }
+
+        // Calculate total time for each project
+        const cyclesWithTime = validProjects.map(project => ({
+            ...project,
+            totalTime: project.measurements.reduce((sum, m) => sum + m.duration, 0)
         }));
 
         // Find best (shortest) and worst (longest)
@@ -92,24 +100,26 @@ function BestWorstCycle() {
 
     return (
         <div style={{ height: '100%', display: 'flex', gap: '20px', padding: '20px', backgroundColor: 'var(--bg-secondary)' }}>
-            {/* Left Panel: Session Selection */}
+            {/* Left Panel: Project Selection */}
             <div style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '15px', borderRight: '1px solid #444', paddingRight: '20px' }}>
-                <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem' }}>📂 Pilih Sesi (Min 2)</h2>
+                <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem' }}>📂 Pilih Project (Min 2)</h2>
                 <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {loading ? (
                         <div style={{ color: '#888' }}>Loading...</div>
-                    ) : sessions.length === 0 ? (
-                        <div style={{ color: '#888' }}>Belum ada sesi tersimpan.</div>
+                    ) : projects.length === 0 ? (
+                        <div style={{ color: '#888' }}>Belum ada project tersimpan.</div>
                     ) : (
-                        sessions.map(session => {
-                            const totalTime = session.measurements.reduce((sum, m) => sum + m.duration, 0);
+                        projects.map(project => {
+                            const totalTime = project.measurements && project.measurements.length > 0
+                                ? project.measurements.reduce((sum, m) => sum + m.duration, 0)
+                                : 0;
                             return (
                                 <div
-                                    key={session.id}
-                                    onClick={() => toggleSessionSelection(session.id)}
+                                    key={project.id}
+                                    onClick={() => toggleProjectSelection(project.id)}
                                     style={{
                                         padding: '10px',
-                                        backgroundColor: selectedSessionIds.includes(session.id) ? 'var(--accent-blue)' : '#333',
+                                        backgroundColor: selectedProjectIds.includes(project.id) ? 'var(--accent-blue)' : '#333',
                                         borderRadius: '6px',
                                         cursor: 'pointer',
                                         border: '1px solid #555',
@@ -117,13 +127,13 @@ function BestWorstCycle() {
                                     }}
                                 >
                                     <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>
-                                        {session.videoName}
+                                        {project.projectName}
                                     </div>
                                     <div style={{ fontSize: '0.8rem', color: '#ccc' }}>
                                         Total: {totalTime.toFixed(2)}s
                                     </div>
                                     <div style={{ fontSize: '0.75rem', color: '#888' }}>
-                                        {new Date(session.timestamp).toLocaleDateString()}
+                                        {new Date(project.lastModified).toLocaleDateString()}
                                     </div>
                                 </div>
                             );
@@ -138,8 +148,8 @@ function BestWorstCycle() {
 
                 {!analysis ? (
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', border: '2px dashed #444', borderRadius: '8px' }}>
-                        {selectedSessionIds.length < 2
-                            ? 'Pilih minimal 2 sesi untuk melihat analisis.'
+                        {selectedProjectIds.length < 2
+                            ? 'Pilih minimal 2 project untuk melihat analisis.'
                             : 'Loading analysis...'}
                     </div>
                 ) : (
@@ -152,7 +162,7 @@ function BestWorstCycle() {
                                     {analysis.bestCycle.totalTime.toFixed(2)}s
                                 </div>
                                 <div style={{ fontSize: '0.85rem', color: '#888' }}>
-                                    {analysis.bestCycle.videoName}
+                                    {analysis.bestCycle.projectName}
                                 </div>
                             </div>
                             <div style={{ padding: '20px', backgroundColor: '#1a1a1a', borderRadius: '8px', border: '2px solid #c50f1f' }}>
@@ -161,7 +171,7 @@ function BestWorstCycle() {
                                     {analysis.worstCycle.totalTime.toFixed(2)}s
                                 </div>
                                 <div style={{ fontSize: '0.85rem', color: '#888' }}>
-                                    {analysis.worstCycle.videoName}
+                                    {analysis.worstCycle.projectName}
                                 </div>
                             </div>
                             <div style={{ padding: '20px', backgroundColor: '#1a1a1a', borderRadius: '8px', border: '2px solid #4da6ff' }}>
@@ -198,9 +208,9 @@ function BestWorstCycle() {
                                                     #{index + 1}
                                                 </span>
                                                 <div>
-                                                    <div style={{ color: '#fff', fontSize: '0.9rem' }}>{cycle.videoName}</div>
+                                                    <div style={{ color: '#fff', fontSize: '0.9rem' }}>{cycle.projectName}</div>
                                                     <div style={{ color: '#888', fontSize: '0.75rem' }}>
-                                                        {new Date(cycle.timestamp).toLocaleString()}
+                                                        {new Date(cycle.lastModified).toLocaleString()}
                                                     </div>
                                                 </div>
                                             </div>
