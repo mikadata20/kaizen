@@ -2,29 +2,31 @@ import React from 'react';
 import LanguageSelector from './LanguageSelector';
 import { useLanguage } from '../i18n/LanguageContext';
 
-function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessionManager, theme, toggleTheme, onLogout }) {
+function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessionManager, theme, toggleTheme, onLogout, sidebarCollapsed }) {
     const { t } = useLanguage();
 
     return (
         <header style={{
             height: '100vh',
-            width: '60px',
+            width: sidebarCollapsed ? '0px' : '60px',
             backgroundColor: 'var(--bg-secondary)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            padding: '20px 0',
+            padding: sidebarCollapsed ? '0' : '20px 0',
             borderLeft: '1px solid var(--border-color)',
             justifyContent: 'flex-start',
-            gap: '20px'
+            gap: '20px',
+            transition: 'width 0.3s ease, padding 0.3s ease',
+            overflow: 'hidden'
         }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '10px', flexShrink: 0 }}>
+            <div style={{ display: sidebarCollapsed ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '10px', flexShrink: 0 }}>
                 <h1 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--accent-blue)', writingMode: 'vertical-rl', textOrientation: 'mixed' }}>MAVi</h1>
             </div>
 
             {setCurrentView && (
                 <div style={{
-                    display: 'flex',
+                    display: sidebarCollapsed ? 'none' : 'flex',
                     flexDirection: 'column',
                     gap: '10px',
                     alignItems: 'center',

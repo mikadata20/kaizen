@@ -46,6 +46,7 @@ function App() {
   const [currentProject, setCurrentProject] = useState(null);
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showOpenProjectDialog, setShowOpenProjectDialog] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -195,6 +196,34 @@ function App() {
   return (
     <LanguageProvider>
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'row', backgroundColor: 'var(--bg-primary)', position: 'relative' }}>
+        {/* Toggle Button - Always Visible */}
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          style={{
+            position: 'fixed',
+            left: sidebarCollapsed ? '0px' : '60px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '30px',
+            height: '60px',
+            backgroundColor: 'var(--accent-blue)',
+            border: 'none',
+            borderRadius: '0 8px 8px 0',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '1.2rem',
+            zIndex: 1001,
+            transition: 'left 0.3s ease',
+            boxShadow: '2px 0 8px rgba(0,0,0,0.3)'
+          }}
+          title={sidebarCollapsed ? 'Show Menu' : 'Hide Menu'}
+        >
+          {sidebarCollapsed ? '▶' : '◀'}
+        </button>
+
         <div className="main-content" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
           {currentView === 'dashboard' ? (
             <div className="workspace-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '10px', gap: '10px' }}>
@@ -320,6 +349,7 @@ function App() {
           onOpenSessionManager={() => setShowSessionManager(true)}
           theme={theme}
           toggleTheme={toggleTheme}
+          sidebarCollapsed={sidebarCollapsed}
         />
 
         {/* Session Manager Modal */}

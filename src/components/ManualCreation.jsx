@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getAllProjects } from '../utils/database';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
 function ManualCreation() {
     const [projects, setProjects] = useState([]);
@@ -13,10 +12,17 @@ function ManualCreation() {
     // Manual Data State
     const [manualData, setManualData] = useState([]);
     const [headerInfo, setHeaderInfo] = useState({
+        // 🆔 Identifikasi Dokumen
+        companyName: '',
         title: 'WORK INSTRUCTION MANUAL',
         docNo: '',
-        date: new Date().toISOString().split('T')[0],
-        author: ''
+        issueDate: new Date().toISOString().split('T')[0],
+        revisionDate: new Date().toISOString().split('T')[0],
+        version: '1.0',
+        author: '',
+        // 🎯 Tujuan dan Ruang Lingkup
+        purpose: '',
+        scope: ''
     });
 
     useEffect(() => {
@@ -89,53 +95,115 @@ function ManualCreation() {
     };
 
     const exportToPDF = () => {
-        const doc = new jsPDF();
+        try {
+            console.log('Starting PDF export...');
 
-        // Header
-        doc.setFontSize(18);
-        doc.text(headerInfo.title, 105, 15, { align: 'center' });
+            if (!manualData || manualData.length === 0) {
+                alert('Tidak ada data untuk diekspor. Silakan pilih proyek terlebih dahulu.');
+                return;
+            }
 
-        doc.setFontSize(10);
-        doc.text(`Doc No: ${headerInfo.docNo}`, 15, 25);
-        doc.text(`Date: ${headerInfo.date}`, 15, 30);
-        doc.text(`Author: ${headerInfo.author}`, 15, 35);
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let yPos = 15;
 
-        // Table Content
-        const tableBody = manualData.map((item, index) => [
-            index + 1,
-            { content: '', image: item.image }, // Placeholder for image
-            item.description,
-            item.keyPoints,
-            item.safety,
-            item.duration.toFixed(1) + 's'
-        ]);
+            // Header
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text(headerInfo.title || 'WORK INSTRUCTION MANUAL', pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
 
-        doc.autoTable({
-            startY: 40,
-            head: [['No', 'Image', 'Description', 'Key Points', 'Safety/Quality', 'Time']],
-            body: tableBody,
-            theme: 'grid',
-            styles: { fontSize: 8, cellPadding: 2, minCellHeight: 30 },
-            columnStyles: {
-                0: { cellWidth: 10 },
-                1: { cellWidth: 40 },
-                2: { cellWidth: 50 },
-                3: { cellWidth: 40 },
-                4: { cellWidth: 30 },
-                5: { cellWidth: 15 }
-            },
-            didDrawCell: (data) => {
-                if (data.column.index === 1 && data.cell.raw.image) {
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Doc No: ${headerInfo.docNo || '-'}`, 15, yPos);
+            yPos += 5;
+            doc.text(`Date: ${headerInfo.date || '-'}`, 15, yPos);
+            yPos += 5;
+            doc.text(`Author: ${headerInfo.author || '-'}`, 15, yPos);
+            yPos += 10;
+
+            // Table Header
+            const tableX = 10;
+            const colWidths = [15, 50, 60, 50];
+            const rowHeight = 50;
+
+            doc.setFillColor(200, 200, 200);
+            doc.rect(tableX, yPos, colWidths.reduce((a, b) => a + b, 0), 8, 'F');
+
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            let xPos = tableX + 2;
+            doc.text('No', xPos, yPos + 5);
+            xPos += colWidths[0];
+            doc.text('Image', xPos, yPos + 5);
+            xPos += colWidths[1];
+            doc.text('Description / Key Points / Safety', xPos, yPos + 5);
+            xPos += colWidths[2];
+            doc.text('Time', xPos, yPos + 5);
+
+            yPos += 8;
+
+            // Table Body
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(8);
+
+            manualData.forEach((item, index) => {
+                // Check if we need a new page
+                if (yPos + rowHeight > pageHeight - 20) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+
+                // Draw cell borders
+                xPos = tableX;
+                doc.rect(xPos, yPos, colWidths[0], rowHeight); // No
+                xPos += colWidths[0];
+                doc.rect(xPos, yPos, colWidths[1], rowHeight); // Image
+                xPos += colWidths[1];
+                doc.rect(xPos, yPos, colWidths[2], rowHeight); // Description
+                xPos += colWidths[2];
+                doc.rect(xPos, yPos, colWidths[3], rowHeight); // Time
+
+                // Fill content
+                xPos = tableX + 2;
+                doc.text(String(index + 1), xPos, yPos + 5);
+
+                xPos += colWidths[0];
+                // Add image if exists
+                if (item.image) {
                     try {
-                        doc.addImage(data.cell.raw.image, 'JPEG', data.cell.x + 2, data.cell.y + 2, 36, 26);
+                        doc.addImage(item.image, 'JPEG', xPos + 2, yPos + 2, 45, 45);
                     } catch (e) {
-                        console.error('Error adding image to PDF', e);
+                        console.error('Error adding image:', e);
+                        doc.text('(Image)', xPos + 2, yPos + 25);
                     }
                 }
-            }
-        });
 
-        doc.save(`${headerInfo.title.replace(/\s+/g, '_')}.pdf`);
+                xPos += colWidths[1];
+                // Description, Key Points, Safety
+                const textLines = [];
+                if (item.description) textLines.push(`Desc: ${item.description}`);
+                if (item.keyPoints) textLines.push(`Key: ${item.keyPoints}`);
+                if (item.safety) textLines.push(`Safety: ${item.safety}`);
+
+                const splitText = doc.splitTextToSize(textLines.join(' | '), colWidths[2] - 4);
+                doc.text(splitText, xPos + 2, yPos + 5);
+
+                xPos += colWidths[2];
+                doc.text((item.duration ? item.duration.toFixed(1) : '0.0') + 's', xPos + 2, yPos + 5);
+
+                yPos += rowHeight;
+            });
+
+            const filename = `${(headerInfo.title || 'Work_Instruction').replace(/\s+/g, '_')}.pdf`;
+            console.log('Saving PDF as:', filename);
+            doc.save(filename);
+            console.log('PDF export completed successfully');
+        } catch (error) {
+            console.error('Error exporting PDF:', error);
+            alert('Gagal mengekspor PDF: ' + error.message);
+        }
     };
 
     return (
