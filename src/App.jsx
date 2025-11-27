@@ -20,6 +20,9 @@ import StandardWorkCombinationSheet from './components/StandardWorkCombinationSh
 import StatisticalAnalysis from './components/StatisticalAnalysis';
 import MTMCalculator from './components/MTMCalculator';
 import AllowanceCalculator from './components/AllowanceCalculator';
+import YamazumiChart from './components/YamazumiChart';
+import MultiAxialAnalysis from './components/MultiAxialAnalysis';
+import ManualCreation from './components/ManualCreation';
 import { saveProject, getProjectByName, updateProject } from './utils/database';
 import { importProject } from './utils/projectExport';
 import { LanguageProvider } from './i18n/LanguageContext';
@@ -267,6 +270,18 @@ function App() {
           ) : currentView === 'allowance-calculator' ? (
             <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
               <AllowanceCalculator />
+            </div>
+          ) : currentView === 'yamazumi' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <YamazumiChart measurements={measurements} />
+            </div>
+          ) : currentView === 'multi-axial' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <MultiAxialAnalysis />
+            </div>
+          ) : currentView === 'manual-creation' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <ManualCreation />
             </div>
           ) : (
             <div style={{ flex: 1, display: 'flex', gap: '10px', padding: '10px' }}>

@@ -53,6 +53,8 @@ function Help() {
 🔧 **Allowance** - Kalkulasi kelonggaran & fatigue
 🏆 **Best/Worst** - Analisis cycle terbaik vs terburuk
 🎥 **Compare** - Video side-by-side comparison
+📑 **Multi-Axial** - Analisis multi-project (Man-Machine/Two-Hand)
+📘 **Manual** - Pembuatan manual kerja (Work Instruction)
 ❓ **Help** - Panduan penggunaan aplikasi
 
 **Element Editor Tools:**
@@ -462,6 +464,45 @@ Standard Time = Normal Time × (1 + Allowances)
 **Split tidak bekerja:**
 ✅ Pastikan waktu split berada di range element
 ✅ Format: angka desimal (contoh: 3.5)
+            `
+        },
+        multiaxial: {
+            title: '📑 Multi-Axial Analysis',
+            content: `
+**Fungsi:**
+Analisis dan perbandingan multi-proyek dalam satu timeline (Gantt Chart). Ideal untuk Man-Machine Chart atau Two-Hand Process Chart.
+
+**Cara Pakai:**
+1. Klik icon 📑 di header
+2. Pilih beberapa proyek sekaligus dari dropdown
+3. Analisis visualisasi lane yang terpisah untuk setiap proyek
+4. Gunakan zoom slider untuk detail waktu
+
+**Use Case:**
+• Membandingkan aktivitas Operator vs Mesin
+• Analisis gerakan Tangan Kiri vs Tangan Kanan
+• Membandingkan dua operator yang bekerja paralel
+            `
+        },
+        manualcreation: {
+            title: '📘 Manual Creation',
+            content: `
+**Fungsi:**
+Membuat dokumen Instruksi Kerja (Work Instruction/SOP) visual dengan mengambil gambar langsung dari video.
+
+**Cara Pakai:**
+1. Klik icon 📘 di header
+2. Pilih proyek dengan video
+3. Untuk setiap langkah kerja:
+   • Play/Seek video ke posisi yang tepat
+   • Klik tombol **📸 Capture**
+   • Isi Deskripsi, Key Points, dan Safety Notes
+4. Klik **Export PDF** untuk mengunduh dokumen
+
+**Fitur:**
+• Auto-capture frame video resolusi tinggi
+• Format tabel standar industri
+• Export PDF siap cetak
             `
         }
     };

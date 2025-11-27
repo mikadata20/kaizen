@@ -57,6 +57,8 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 | 🔧 | Allowance | Kalkulasi kelonggaran & fatigue |
 | 🏆 | Best/Worst | Analisis cycle terbaik/terburuk |
 | 🎥 | Compare | Video side-by-side comparison |
+| 📑 | Multi-Axial | Analisis multi-project (Man-Machine/Two-Hand) |
+| 📘 | Manual | Pembuatan manual kerja (Work Instruction) |
 | ❓ | Help | Panduan penggunaan |
 
 ---
@@ -294,6 +296,61 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 
 ---
 
+---
+
+### 16. 📑 Multi-Axial Analysis (BARU!)
+
+**🎯 Tujuan:** Menganalisis dan membandingkan beberapa proyek secara bersamaan dalam satu timeline (Gantt Chart). Cocok untuk analisis Man-Machine atau Two-Hand Process Chart.
+
+**Fitur:**
+- **Multi-Project Selection**: Pilih beberapa proyek (misal: "Operator" dan "Mesin").
+- **Timeline Visualization**: Visualisasi aktivitas dalam lane terpisah.
+- **Zoom Control**: Atur skala waktu untuk detail lebih baik.
+
+**Cara Pakai:**
+1. Klik icon 📑 di header.
+2. Pilih proyek-proyek yang ingin dibandingkan.
+3. Analisis interaksi antar lane (misal: operator menunggu mesin).
+
+---
+
+### 17. 📋 Standard Work Combination Sheet (SWCS) Export (BARU!)
+
+**🎯 Tujuan:** Menghasilkan dokumen Standard Work Combination Sheet dalam format PDF standar industri.
+
+**Fitur:**
+- **Header Input**: Nama Part, No Part, Takt Time, Tanggal, dll.
+- **Auto-Chart**: Visualisasi Manual (Hijau), Auto (Biru putus-putus), dan Walk (Merah gelombang).
+- **PDF Export**: Download dokumen siap cetak.
+
+**Cara Pakai:**
+1. Buka menu SWCS (bisa via menu utama atau shortcut jika ada).
+2. Pilih proyek.
+3. Isi data header.
+4. Klik **Export PDF**.
+
+---
+
+### 18. 📘 Manual Creation (Work Instruction) (BARU!)
+
+**🎯 Tujuan:** Membuat dokumen instruksi kerja (Work Instruction/SOP) visual dengan cepat dari video.
+
+**Fitur:**
+- **Video Capture**: Ambil screenshot langsung dari video untuk setiap langkah.
+- **Text Editor**: Tambahkan deskripsi, poin kunci, dan safety/quality notes.
+- **PDF Export**: Generate dokumen manual lengkap dengan gambar dan teks.
+
+**Cara Pakai:**
+1. Klik icon 📘 di header.
+2. Pilih proyek dengan video.
+3. Untuk setiap elemen:
+   - Seek video ke posisi yang tepat.
+   - Klik **Capture** untuk ambil gambar.
+   - Isi deskripsi dan poin penting.
+4. Klik **Export PDF** untuk unduh manual.
+
+---
+
 ## 📝 Panduan Step-by-Step
 
 ### Workflow 1: Analisis Video Baru
@@ -324,7 +381,13 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 
 ## 📈 Update Log
 
-### Version 2.1 (Current)
+### Version 2.2 (Current)
+- ✅ **New**: Multi-Axial Analysis (Man-Machine / Two-Hand Chart)
+- ✅ **New**: Standard Work Combination Sheet (SWCS) PDF Export
+- ✅ **New**: Manual Creation (Work Instruction Generator) with Video Capture
+- ✅ **Update**: Enhanced Documentation
+
+### Version 2.1
 - ✅ **New**: Statistical Analysis Module (Cp, Cpk, Control Charts)
 - ✅ **New**: MTM-1 Calculator
 - ✅ **New**: Allowance Calculator with variable fatigue factors
