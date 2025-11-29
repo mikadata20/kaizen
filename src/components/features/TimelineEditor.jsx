@@ -258,16 +258,16 @@ function TimelineEditor({ videoState, measurements, onSeek, onSelectMeasurement,
     return (
         <div style={{
             backgroundColor: '#1a1a1a',
-            padding: '10px',
+            padding: '4px',
             borderRadius: '4px',
-            marginBottom: '5px'
+            marginBottom: '2px'
         }}>
             {/* Timeline Header with Toolbar */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '8px',
+                marginBottom: '4px',
                 fontSize: '0.75rem',
                 color: '#888'
             }}>
@@ -339,7 +339,7 @@ function TimelineEditor({ videoState, measurements, onSeek, onSelectMeasurement,
             <div
                 style={{
                     position: 'relative',
-                    height: '20px',
+                    height: '16px',
                     backgroundColor: '#0a0a0a',
                     borderRadius: '4px 4px 0 0',
                     border: '1px solid #333',
@@ -420,7 +420,7 @@ function TimelineEditor({ videoState, measurements, onSeek, onSelectMeasurement,
                 onClick={handleTimelineClick}
                 style={{
                     position: 'relative',
-                    height: '60px',
+                    height: '50px',
                     backgroundColor: '#0a0a0a',
                     borderRadius: '0 0 4px 4px',
                     cursor: cuttingMode ? 'crosshair' : 'pointer',
@@ -440,7 +440,7 @@ function TimelineEditor({ videoState, measurements, onSeek, onSelectMeasurement,
                             style={{
                                 position: 'absolute',
                                 left: `${startPercent}%`,
-                                top: '2px',
+                                top: '0px',
                                 width: `${widthPercent}%`,
                                 height: '12px',
                                 backgroundColor: 'rgba(0, 90, 158, 0.6)',
@@ -492,9 +492,9 @@ function TimelineEditor({ videoState, measurements, onSeek, onSelectMeasurement,
                             style={{
                                 position: 'absolute',
                                 left: `${startPercent}%`,
-                                top: '20px',
+                                top: '14px',
                                 width: `${widthPercent}%`,
-                                height: '30px',
+                                height: '34px',
                                 backgroundColor: getCategoryColor(measurement.category),
                                 border: isHovered ? '2px solid white' : '1px solid rgba(0,0,0,0.3)',
                                 borderRadius: '2px',
@@ -591,8 +591,8 @@ function TimelineEditor({ videoState, measurements, onSeek, onSelectMeasurement,
             {/* Hovered measurement info */}
             {/* Hovered measurement info - Always render to prevent layout shift */}
             <div style={{
-                marginTop: '8px',
-                padding: '6px 8px',
+                marginTop: '4px',
+                padding: '4px 8px',
                 backgroundColor: '#222',
                 borderRadius: '4px',
                 fontSize: '0.75rem',
@@ -600,7 +600,7 @@ function TimelineEditor({ videoState, measurements, onSeek, onSelectMeasurement,
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                minHeight: '28px', // Fixed height
+                minHeight: '24px', // Fixed height
                 visibility: hoveredMeasurement ? 'visible' : 'hidden' // Hide instead of unmount
             }}>
                 <span style={{ fontWeight: 'bold' }}>{hoveredMeasurement ? hoveredMeasurement.elementName : '-'}</span>

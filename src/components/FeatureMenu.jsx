@@ -4,6 +4,15 @@ function FeatureMenu({ onFeatureSelect }) {
     const [expandedCategory, setExpandedCategory] = useState(null);
 
     const features = {
+        'Video Capture & Recording': [
+            'IP Camera Connection',
+            'HTTP/HTTPS Stream',
+            'HLS Stream Support',
+            'Video Recording',
+            'Recording Format Selection',
+            'Live Stream Snapshot',
+            'Stream Status Monitor'
+        ],
         'Analysis/Playback': [
             'Video Limit Adjustment',
             'Display Item Selection (Irregular/Comparative Value Difference)',
@@ -146,6 +155,7 @@ function FeatureMenu({ onFeatureSelect }) {
     };
 
     const categoryColors = {
+        'Video Capture & Recording': '#c50f1f',
         'Analysis/Playback': '#4a6fa5',
         'Analysis Explorer': '#4a6fa5',
         'Aggregation': '#4a6fa5',

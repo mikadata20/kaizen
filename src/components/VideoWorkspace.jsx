@@ -4,6 +4,8 @@ import PlaybackControls from './features/PlaybackControls';
 import TimelineMeasurement from './features/TimelineMeasurement';
 import TimelineEditor from './features/TimelineEditor';
 import VideoAnnotation from './features/VideoAnnotation';
+import IPCameraConnect from './features/IPCameraConnect';
+import VideoRecorder from './features/VideoRecorder';
 import ProjectButtons from './ProjectButtons';
 import { useVideoPlayer } from '../hooks/useVideoPlayer';
 import { captureScreenshot, exportAnalysisData } from '../utils/screenshotCapture';
@@ -36,8 +38,33 @@ function VideoWorkspace({
     const [drawColor, setDrawColor] = useState('#ff0000');
     const [lineWidth, setLineWidth] = useState(3);
 
+    // IP Camera & Recording State
+    const [videoSourceType, setVideoSourceType] = useState('file'); // 'file', 'stream'
+    const [showCameraPanel, setShowCameraPanel] = useState(false);
+    const [showRecorderPanel, setShowRecorderPanel] = useState(false);
+    const [isStreamConnected, setIsStreamConnected] = useState(false);
+
     const containerRef = useRef(null);
+    const videoContainerRef = useRef(null);
     const isResizing = useRef(false);
+
+    // Use video player hook
+    const {
+        videoRef,
+        videoState,
+        togglePlay,
+        setPlaybackSpeed,
+        nextFrame,
+        previousFrame,
+        seekTo,
+        setZoom,
+        addMeasurement,
+        removeMeasurement,
+        updateMeasurements,
+        toggleReverse,
+        handleTimeUpdate,
+        handleLoadedMetadata
+    } = useVideoPlayer(measurements);
 
     const startResizing = useCallback(() => {
         isResizing.current = true;
@@ -69,25 +96,8 @@ function VideoWorkspace({
         };
     }, [handleMouseMove, stopResizing]);
 
-    const {
-        videoRef,
-        videoState,
-        togglePlay,
-        setPlaybackSpeed,
-        nextFrame,
-        previousFrame,
-        seekTo,
-        setZoom,
-        addMeasurement,
-        removeMeasurement,
-        toggleReverse,
-        handleTimeUpdate,
-        handleLoadedMetadata,
-        updateMeasurements
-    } = useVideoPlayer(measurements || []);
-
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
         if (file) {
             const url = URL.createObjectURL(file);
             onVideoChange(url);
@@ -202,7 +212,7 @@ function VideoWorkspace({
                 backgroundColor: '#000',
                 position: 'relative'
             }}>
-                <div style={{
+                <div ref={videoContainerRef} style={{
                     flex: 1,
                     display: 'flex',
                     alignItems: 'center',
@@ -222,6 +232,7 @@ function VideoWorkspace({
                                 src={videoSrc}
                                 onTimeUpdate={handleTimeUpdate}
                                 onLoadedMetadata={handleLoadedMetadata}
+                                crossOrigin="anonymous"
                                 style={{
                                     width: '100%',
                                     maxHeight: '100%',
@@ -372,6 +383,80 @@ function VideoWorkspace({
                             🎨
                         </button>
                     )}
+
+                    {/* IP Camera Toggle Button */}
+                    <button
+                        onClick={() => setShowCameraPanel(!showCameraPanel)}
+                        style={{
+                            position: 'absolute',
+                            top: '10px',
+                            left: videoSrc ? (onLogout ? '100px' : '55px') : (onLogout ? '55px' : '10px'),
+                            zIndex: 100,
+                            backgroundColor: showCameraPanel ? '#c50f1f' : '#333',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '6px',
+                            cursor: 'pointer',
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '35px',
+                            height: '35px',
+                            boxShadow: showCameraPanel ? '0 2px 8px rgba(197, 15, 31, 0.5)' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.transform = 'scale(1.1)';
+                            e.target.style.boxShadow = showCameraPanel ? '0 4px 12px rgba(197, 15, 31, 0.6)' : '0 4px 12px rgba(0, 0, 0, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.boxShadow = showCameraPanel ? '0 2px 8px rgba(197, 15, 31, 0.5)' : '0 2px 8px rgba(0, 0, 0, 0.3)';
+                        }}
+                        title={showCameraPanel ? "Hide Camera Panel" : "Show Camera Panel"}
+                    >
+                        📹
+                    </button>
+
+                    {/* Recording Toggle Button */}
+                    <button
+                        onClick={() => setShowRecorderPanel(!showRecorderPanel)}
+                        style={{
+                            position: 'absolute',
+                            top: '10px',
+                            left: videoSrc ? (onLogout ? '145px' : '100px') : (onLogout ? '100px' : '55px'),
+                            zIndex: 100,
+                            backgroundColor: showRecorderPanel ? '#c50f1f' : '#333',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '6px',
+                            cursor: 'pointer',
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '35px',
+                            height: '35px',
+                            boxShadow: showRecorderPanel ? '0 2px 8px rgba(197, 15, 31, 0.5)' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.transform = 'scale(1.1)';
+                            e.target.style.boxShadow = showRecorderPanel ? '0 4px 12px rgba(197, 15, 31, 0.6)' : '0 4px 12px rgba(0, 0, 0, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.boxShadow = showRecorderPanel ? '0 2px 8px rgba(197, 15, 31, 0.5)' : '0 2px 8px rgba(0, 0, 0, 0.3)';
+                        }}
+                        title={showRecorderPanel ? "Hide Recorder Panel" : "Show Recorder Panel"}
+                    >
+                        🎥
+                    </button>
 
                     {/* Full Screen Video Button */}
                     {videoSrc && (
@@ -605,6 +690,38 @@ function VideoWorkspace({
                 width: fullScreenMode === 'editor' ? '100%' : 'auto',
                 position: 'relative'
             }}>
+                {/* IP Camera Panel */}
+                {showCameraPanel && (
+                    <IPCameraConnect
+                        videoRef={videoRef}
+                        onStreamConnected={(url, type) => {
+                            setVideoSourceType('stream');
+                            setIsStreamConnected(true);
+                            onVideoChange(url);
+                            onVideoNameChange(`Stream: ${url}`);
+                        }}
+                        onStreamDisconnected={() => {
+                            setVideoSourceType('file');
+                            setIsStreamConnected(false);
+                            onVideoChange(null);
+                        }}
+                    />
+                )}
+
+                {/* Video Recorder Panel */}
+                {showRecorderPanel && (
+                    <VideoRecorder
+                        videoRef={videoRef}
+                        videoSrc={videoSrc}
+                        onRecordingComplete={(blob, url) => {
+                            if (url) {
+                                onVideoChange(url);
+                                onVideoNameChange('Recorded Video');
+                                setVideoSourceType('file');
+                            }
+                        }}
+                    />
+                )}
                 {/* Full Screen Element Editor Button */}
                 <button
                     onClick={() => setFullScreenMode(fullScreenMode === 'editor' ? 'none' : 'editor')}

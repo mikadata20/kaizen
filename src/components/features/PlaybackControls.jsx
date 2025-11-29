@@ -47,10 +47,10 @@ function PlaybackControls({
     return (
         <div style={{
             backgroundColor: '#222',
-            padding: '8px',
+            padding: '4px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '4px',
             borderTop: '1px solid #444'
         }}>
             {/* Main Controls - Single Row */}
