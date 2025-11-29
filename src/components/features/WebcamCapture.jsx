@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import WebcamHandler from '../../utils/webcamHandler';
 
-function WebcamCapture({ onWebcamStarted, onWebcamStopped, videoRef }) {
+function WebcamCapture({ onWebcamStarted, onWebcamStopped, videoRef, onStartRecording }) {
     const [webcamHandler] = useState(() => new WebcamHandler());
     const [isActive, setIsActive] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
@@ -437,6 +437,28 @@ function WebcamCapture({ onWebcamStarted, onWebcamStopped, videoRef }) {
                         onMouseLeave={(e) => e.target.style.backgroundColor = '#c50f1f'}
                     >
                         ⏹️ Stop Webcam
+                    </button>
+
+                    {/* Start Recording Button */}
+                    <button
+                        onClick={onStartRecording}
+                        style={{
+                            width: '100%',
+                            marginTop: '10px',
+                            padding: '10px',
+                            backgroundColor: '#2d7d46',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '0.95rem',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#1e5c32'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#2d7d46'}
+                    >
+                        ⏺️ Start Recording
                     </button>
                 </>
             )}

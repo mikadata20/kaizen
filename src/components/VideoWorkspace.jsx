@@ -781,6 +781,7 @@ function VideoWorkspace({
                             setIsWebcamActive(false);
                             onVideoChange(null);
                         }}
+                        onStartRecording={() => setShowRecorderPanel(true)}
                     />
                 )}
                 {/* Full Screen Element Editor Button */}

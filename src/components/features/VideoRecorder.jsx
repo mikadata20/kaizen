@@ -70,6 +70,55 @@ function VideoRecorderComponent({ videoRef, videoSrc, isWebcamActive, onRecordin
 
     // ...
 
+    const handlePauseRecording = () => {
+        recorder.pauseRecording();
+        setIsPaused(true);
+        stopDurationTimer();
+    };
+
+    const handleResumeRecording = () => {
+        recorder.resumeRecording();
+        setIsPaused(false);
+        startDurationTimer();
+    };
+
+    const handleStopRecording = async () => {
+        try {
+            const blob = await recorder.stopRecording();
+            setRecordedBlob(blob);
+            setIsRecording(false);
+            setIsPaused(false);
+            stopDurationTimer();
+
+            if (onRecordingComplete) {
+                const url = URL.createObjectURL(blob);
+                onRecordingComplete(blob, url);
+            }
+        } catch (err) {
+            setError(err.message || 'Gagal menghentikan recording');
+        }
+    };
+
+    const handleDownload = () => {
+        if (recordedBlob) {
+            const url = URL.createObjectURL(recordedBlob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `recording_${new Date().toISOString().replace(/[:.]/g, '-')}.${selectedFormat.split('/')[1] || 'webm'}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    };
+
+    const formatDuration = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     return (
         <div style={{
             backgroundColor: 'rgba(26, 26, 26, 0.95)',
