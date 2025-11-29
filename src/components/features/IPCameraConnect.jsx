@@ -31,6 +31,17 @@ function IPCameraConnect({ onStreamConnected, onStreamDisconnected, videoRef }) 
             return;
         }
 
+        // Basic validation for webpage URLs
+        const isWebpage = !streamUrl.includes('.m3u8') &&
+            !streamUrl.includes('.mp4') &&
+            !streamUrl.includes(':') && // Port usually indicates stream
+            !streamUrl.endsWith('/video'); // Common endpoint
+
+        if (streamType === 'http' && isWebpage && !streamUrl.includes('localhost') && !streamUrl.includes('192.168')) {
+            // Show warning but allow proceeding if user insists (maybe they have a special setup)
+            // For now, we'll just log it and let the connection fail naturally, but we'll improve the error message below.
+        }
+
         if (!videoRef?.current) {
             setError('Video element tidak tersedia');
             return;
@@ -59,8 +70,14 @@ function IPCameraConnect({ onStreamConnected, onStreamDisconnected, videoRef }) 
                 });
             }
         } catch (err) {
-            setError(err.message || 'Gagal terhubung ke stream');
             console.error('Connection error:', err);
+
+            // Improve error message based on URL
+            if (streamUrl.startsWith('http') && !streamUrl.includes('.m3u8') && !streamUrl.includes('.mp4')) {
+                setError('Gagal terhubung. Pastikan URL adalah direct stream (misal: .m3u8, .mp4, atau MJPEG), bukan halaman web.');
+            } else {
+                setError(err.message || 'Gagal terhubung ke stream');
+            }
         } finally {
             setIsConnecting(false);
         }
@@ -278,7 +295,12 @@ function IPCameraConnect({ onStreamConnected, onStreamDisconnected, videoRef }) 
                         color: '#4cc9f0',
                         fontSize: '0.75rem'
                     }}>
-                        💡 <strong>Tips:</strong> Untuk RTSP stream, gunakan media server seperti FFmpeg untuk konversi ke HTTP/HLS terlebih dahulu.
+                        💡 <strong>Tips:</strong>
+                        <ul style={{ margin: '5px 0 0 15px', padding: 0 }}>
+                            <li>URL harus link langsung ke video (bukan halaman web).</li>
+                            <li>Untuk RTSP, gunakan server konversi (seperti FFmpeg/VLC) ke HTTP/HLS.</li>
+                            <li>Cari URL yang berakhiran .m3u8 atau .mp4.</li>
+                        </ul>
                     </div>
                 </>
             ) : (

@@ -44,27 +44,22 @@ function WebcamCapture({ onWebcamStarted, onWebcamStopped, videoRef, onStartReco
 
     const handleStart = async () => {
         console.log('WebcamCapture - handleStart called');
-        console.log('videoRef:', videoRef);
-        console.log('videoRef.current:', videoRef?.current);
 
         if (!videoRef) {
             setError('Video reference tidak tersedia');
-            console.error('videoRef is null or undefined');
             return;
         }
 
-        // Wait for video element to be ready with retry mechanism
+        // Wait for video element to be ready
         let retries = 0;
         const maxRetries = 10;
         while (!videoRef.current && retries < maxRetries) {
-            console.log(`Waiting for video element... retry ${retries + 1}/${maxRetries}`);
             await new Promise(resolve => setTimeout(resolve, 100));
             retries++;
         }
 
         if (!videoRef.current) {
-            setError('Video element belum siap. Pastikan video player sudah dimuat. Coba refresh halaman jika masalah berlanjut.');
-            console.error('videoRef.current is still null after retries');
+            setError('Video element belum siap.');
             return;
         }
 
@@ -75,27 +70,16 @@ function WebcamCapture({ onWebcamStarted, onWebcamStopped, videoRef, onStartReco
             // Parse resolution
             const [width, height] = selectedResolution.split('x').map(Number);
 
-            console.log('Starting webcam with resolution:', width, 'x', height);
-
             // Start webcam
             const stream = await webcamHandler.startWebcam(
                 selectedDevice || null,
                 { width: { ideal: width }, height: { ideal: height } }
             );
 
-            console.log('Webcam stream obtained:', stream);
-
             // Attach stream to video element
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
-                try {
-                    await videoRef.current.play();
-                    console.log('Video playing');
-                } catch (playError) {
-                    console.error('Error playing video:', playError);
-                    // Try to play without await
-                    videoRef.current.play().catch(e => console.error('Play failed:', e));
-                }
+                videoRef.current.play().catch(e => console.error('Play failed:', e));
             }
 
             setIsActive(true);
@@ -111,6 +95,44 @@ function WebcamCapture({ onWebcamStarted, onWebcamStopped, videoRef, onStartReco
         } catch (err) {
             console.error('Webcam start error:', err);
             setError(err.message || 'Gagal memulai webcam');
+        } finally {
+            setIsStarting(false);
+        }
+    };
+
+    const handleStartScreenShare = async () => {
+        if (!videoRef?.current) {
+            setError('Video element tidak tersedia');
+            return;
+        }
+
+        setIsStarting(true);
+        setError(null);
+
+        try {
+            const stream = await webcamHandler.startScreenCapture();
+
+            // Attach stream to video element
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                videoRef.current.play().catch(e => console.error('Play failed:', e));
+            }
+
+            setIsActive(true);
+
+            // Listen for stream end (user clicks "Stop Sharing" in browser UI)
+            stream.getVideoTracks()[0].onended = () => {
+                handleStop();
+            };
+
+            if (onWebcamStarted) {
+                onWebcamStarted(stream);
+            }
+        } catch (err) {
+            console.error('Screen share error:', err);
+            if (err.name !== 'NotAllowedError') { // Ignore if user cancelled
+                setError(err.message || 'Gagal memulai screen share');
+            }
         } finally {
             setIsStarting(false);
         }
@@ -337,7 +359,8 @@ function WebcamCapture({ onWebcamStarted, onWebcamStopped, videoRef, onStartReco
                                     fontSize: '0.95rem',
                                     fontWeight: 'bold',
                                     cursor: isStarting ? 'not-allowed' : 'pointer',
-                                    transition: 'background-color 0.2s'
+                                    transition: 'background-color 0.2s',
+                                    marginBottom: '10px'
                                 }}
                                 onMouseEnter={(e) => {
                                     if (!isStarting) e.target.style.backgroundColor = '#005a9e';
@@ -347,6 +370,32 @@ function WebcamCapture({ onWebcamStarted, onWebcamStopped, videoRef, onStartReco
                                 }}
                             >
                                 {isStarting ? '🔄 Starting...' : '📷 Start Webcam'}
+                            </button>
+
+                            {/* Share Screen Button */}
+                            <button
+                                onClick={handleStartScreenShare}
+                                disabled={isStarting}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    backgroundColor: isStarting ? '#555' : '#5c2d91',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 'bold',
+                                    cursor: isStarting ? 'not-allowed' : 'pointer',
+                                    transition: 'background-color 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isStarting) e.target.style.backgroundColor = '#4c2579';
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isStarting) e.target.style.backgroundColor = '#5c2d91';
+                                }}
+                            >
+                                🖥️ Share Screen / Webpage
                             </button>
 
                             {/* Info */}

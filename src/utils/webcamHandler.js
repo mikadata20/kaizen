@@ -87,6 +87,32 @@ class WebcamHandler {
     }
 
     /**
+     * Start screen capture
+     * @returns {Promise<MediaStream>} Screen capture stream
+     */
+    async startScreenCapture() {
+        try {
+            // Stop existing stream if any
+            if (this.stream) {
+                this.stopWebcam();
+            }
+
+            // Get display media
+            this.stream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    cursor: "always"
+                },
+                audio: false
+            });
+
+            return this.stream;
+        } catch (error) {
+            console.error('Error starting screen capture:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Stop webcam stream
      */
     stopWebcam() {
