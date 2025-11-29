@@ -6,6 +6,7 @@ import TimelineEditor from './features/TimelineEditor';
 import VideoAnnotation from './features/VideoAnnotation';
 import IPCameraConnect from './features/IPCameraConnect';
 import VideoRecorder from './features/VideoRecorder';
+import WebcamCapture from './features/WebcamCapture';
 import ProjectButtons from './ProjectButtons';
 import { useVideoPlayer } from '../hooks/useVideoPlayer';
 import { captureScreenshot, exportAnalysisData } from '../utils/screenshotCapture';
@@ -39,10 +40,12 @@ function VideoWorkspace({
     const [lineWidth, setLineWidth] = useState(3);
 
     // IP Camera & Recording State
-    const [videoSourceType, setVideoSourceType] = useState('file'); // 'file', 'stream'
+    const [videoSourceType, setVideoSourceType] = useState('file'); // 'file', 'stream', 'webcam'
     const [showCameraPanel, setShowCameraPanel] = useState(false);
     const [showRecorderPanel, setShowRecorderPanel] = useState(false);
+    const [showWebcamPanel, setShowWebcamPanel] = useState(false);
     const [isStreamConnected, setIsStreamConnected] = useState(false);
+    const [isWebcamActive, setIsWebcamActive] = useState(false);
 
     const containerRef = useRef(null);
     const videoContainerRef = useRef(null);
@@ -220,42 +223,45 @@ function VideoWorkspace({
                     overflow: 'hidden',
                     position: 'relative'
                 }}>
-                    {videoSrc ? (
-                        <div style={{
-                            transform: `scale(${videoState.zoom})`,
-                            transformOrigin: 'center center',
-                            transition: 'transform 0.2s',
-                            position: 'relative'
-                        }}>
-                            <video
-                                ref={videoRef}
-                                src={videoSrc}
-                                onTimeUpdate={handleTimeUpdate}
-                                onLoadedMetadata={handleLoadedMetadata}
-                                crossOrigin="anonymous"
-                                style={{
-                                    width: '100%',
-                                    maxHeight: '100%',
-                                    display: 'block'
-                                }}
-                            />
+                    {/* Video element - always rendered for webcam/stream support */}
+                    <div style={{
+                        transform: `scale(${videoState.zoom})`,
+                        transformOrigin: 'center center',
+                        transition: 'transform 0.2s',
+                        position: 'relative',
+                        display: (videoSrc || isWebcamActive || isStreamConnected) ? 'block' : 'none'
+                    }}>
+                        <video
+                            ref={videoRef}
+                            src={videoSrc}
+                            onTimeUpdate={handleTimeUpdate}
+                            onLoadedMetadata={handleLoadedMetadata}
+                            crossOrigin="anonymous"
+                            style={{
+                                width: '100%',
+                                maxHeight: '100%',
+                                display: 'block'
+                            }}
+                        />
 
-                            {/* Video Annotation Overlay */}
-                            {showAnnotationTool && (
-                                <VideoAnnotation
-                                    videoRef={videoRef}
-                                    videoState={videoState}
-                                    annotations={drawingAnnotations}
-                                    onUpdateAnnotations={setDrawingAnnotations}
-                                    currentTool={currentTool}
-                                    drawColor={drawColor}
-                                    lineWidth={lineWidth}
-                                />
-                            )}
-                        </div>
-                    ) : (
+                        {/* Video Annotation Overlay */}
+                        {showAnnotationTool && (
+                            <VideoAnnotation
+                                videoRef={videoRef}
+                                videoState={videoState}
+                                annotations={drawingAnnotations}
+                                onUpdateAnnotations={setDrawingAnnotations}
+                                currentTool={currentTool}
+                                drawColor={drawColor}
+                                lineWidth={lineWidth}
+                            />
+                        )}
+                    </div>
+
+                    {/* Placeholder when no video */}
+                    {!videoSrc && !isWebcamActive && !isStreamConnected && (
                         <div style={{ color: '#666', textAlign: 'center' }}>
-                            <p>Tidak ada video yang dipilih</p>
+                            <p>Upload video atau gunakan IP Camera/Webcam</p>
                             <button
                                 className="btn"
                                 onClick={() => fileInputRef.current.click()}
@@ -456,6 +462,43 @@ function VideoWorkspace({
                         title={showRecorderPanel ? "Hide Recorder Panel" : "Show Recorder Panel"}
                     >
                         🎥
+                    </button>
+
+                    {/* Webcam Toggle Button */}
+                    <button
+                        onClick={() => setShowWebcamPanel(!showWebcamPanel)}
+                        style={{
+                            position: 'absolute',
+                            top: '10px',
+                            left: videoSrc ? (onLogout ? '190px' : '145px') : (onLogout ? '145px' : '100px'),
+                            zIndex: 100,
+                            backgroundColor: showWebcamPanel ? '#0078d4' : '#333',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '6px',
+                            cursor: 'pointer',
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '35px',
+                            height: '35px',
+                            boxShadow: showWebcamPanel ? '0 2px 8px rgba(0, 120, 212, 0.5)' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.transform = 'scale(1.1)';
+                            e.target.style.boxShadow = showWebcamPanel ? '0 4px 12px rgba(0, 120, 212, 0.6)' : '0 4px 12px rgba(0, 0, 0, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.boxShadow = showWebcamPanel ? '0 2px 8px rgba(0, 120, 212, 0.5)' : '0 2px 8px rgba(0, 0, 0, 0.3)';
+                        }}
+                        title={showWebcamPanel ? "Hide Webcam Panel" : "Show Webcam Panel"}
+                    >
+                        📷
                     </button>
 
                     {/* Full Screen Video Button */}
@@ -719,6 +762,23 @@ function VideoWorkspace({
                                 onVideoNameChange('Recorded Video');
                                 setVideoSourceType('file');
                             }
+                        }}
+                    />
+                )}
+
+                {/* Webcam Panel */}
+                {showWebcamPanel && (
+                    <WebcamCapture
+                        videoRef={videoRef}
+                        onWebcamStarted={(stream) => {
+                            setVideoSourceType('webcam');
+                            setIsWebcamActive(true);
+                            onVideoNameChange('Webcam');
+                        }}
+                        onWebcamStopped={() => {
+                            setVideoSourceType('file');
+                            setIsWebcamActive(false);
+                            onVideoChange(null);
                         }}
                     />
                 )}
