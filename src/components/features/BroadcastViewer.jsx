@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
+import ChatBox from './ChatBox';
 
 function BroadcastViewer({ roomId, onClose }) {
     const [status, setStatus] = useState('Connecting...');
     const [error, setError] = useState(null);
+    const [chatMessages, setChatMessages] = useState([]);
     const videoRef = useRef(null);
     const peerRef = useRef(null);
+    const connRef = useRef(null);
 
     useEffect(() => {
         const connectToStream = () => {
@@ -20,10 +23,23 @@ function BroadcastViewer({ roomId, onClose }) {
 
                     // Connect to the host peer
                     const conn = peer.connect(roomId);
+                    connRef.current = conn;
 
                     conn.on('open', () => {
                         console.log('[BroadcastViewer] Data connection open');
                         setStatus('Connected to Host. Waiting for stream...');
+                    });
+
+                    // Handle incoming data (chat messages from host)
+                    conn.on('data', (data) => {
+                        console.log('[BroadcastViewer] Received data:', data);
+                        if (data.type === 'chat') {
+                            setChatMessages(prev => [...prev, {
+                                sender: 'Host',
+                                message: data.message,
+                                timestamp: data.timestamp
+                            }]);
+                        }
                     });
 
                     conn.on('error', (err) => {
@@ -196,6 +212,26 @@ function BroadcastViewer({ roomId, onClose }) {
                 timestamp: Date.now()
             });
         }
+    };
+
+    const sendChatMessage = (message) => {
+        if (!connRef.current || !connRef.current.open) return;
+
+        const chatData = {
+            type: 'chat',
+            message,
+            timestamp: Date.now()
+        };
+
+        // Add to local chat
+        setChatMessages(prev => [...prev, {
+            sender: 'You',
+            message,
+            timestamp: chatData.timestamp
+        }]);
+
+        // Send to host
+        connRef.current.send(chatData);
     };
 
     const [isPlaying, setIsPlaying] = useState(false);
@@ -393,6 +429,13 @@ function BroadcastViewer({ roomId, onClose }) {
                     >
                         Exit Viewer
                     </button>
+
+                    {/* Chat Box */}
+                    <ChatBox
+                        messages={chatMessages}
+                        onSendMessage={sendChatMessage}
+                        userName="You"
+                    />
                 </>
             )
             }

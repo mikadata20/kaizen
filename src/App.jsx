@@ -29,6 +29,7 @@ import { saveProject, getProjectByName, updateProject } from './utils/database';
 import { importProject } from './utils/projectExport';
 import { LanguageProvider } from './i18n/LanguageContext';
 import CollaborationOverlay from './components/features/CollaborationOverlay';
+import BroadcastControls from './components/features/BroadcastControls';
 import './index.css';
 
 function App() {
@@ -42,10 +43,17 @@ function App() {
 
   // Broadcast state
   const [watchRoomId, setWatchRoomId] = useState(null);
-  const videoRef = useRef(null); // Ref to pass to BroadcastManager
+  const videoRef = useRef(null);
   const [streamHandler] = useState(() => new StreamHandler());
   const [remoteCursor, setRemoteCursor] = useState({ x: null, y: null, label: null });
   const [lastDrawingAction, setLastDrawingAction] = useState(null);
+
+  // Global broadcast/chat state
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const peerRef = useRef(null);
+  const viewerAudioRefs = useRef({});
 
   useEffect(() => {
     // Check for "watch" query param
@@ -222,7 +230,7 @@ function App() {
   }
 
   if (!isAuthenticated) {
-    return <Login onLogin={handleLoginSuccess} />;
+    return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
