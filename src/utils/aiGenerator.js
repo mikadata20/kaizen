@@ -25,37 +25,60 @@ export const generateManualContent = async (taskName, apiKey) => {
         }
     `;
 
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
-            })
-        });
+    const models = ['gemini-1.5-flash-001', 'gemini-1.5-flash', 'gemini-pro'];
+    let lastError = null;
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Failed to generate content');
+    for (const model of models) {
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: prompt }]
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                // If model not found (404) or other client error, try next model
+                if (response.status === 404 || response.status === 400) {
+                    console.warn(`Model ${model} failed:`, errorData);
+                    lastError = new Error(errorData.error?.message || `Model ${model} failed`);
+                    continue;
+                }
+                throw new Error(errorData.error?.message || 'Failed to generate content');
+            }
+
+            const data = await response.json();
+            if (!data.candidates || data.candidates.length === 0) {
+                throw new Error("No content generated");
+            }
+            const text = data.candidates[0].content.parts[0].text;
+
+            // Extract JSON from the response (in case of markdown formatting)
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            } else {
+                // If strictly JSON wasn't found, try to parse the whole text or throw
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    throw new Error("Invalid response format from AI");
+                }
+            }
+
+        } catch (error) {
+            console.error(`AI Generation Error (${model}):`, error);
+            lastError = error;
+            // If it's a network error or something else, we might still want to try the next model if appropriate, 
+            // but usually we just continue the loop.
         }
-
-        const data = await response.json();
-        const text = data.candidates[0].content.parts[0].text;
-
-        // Extract JSON from the response (in case of markdown formatting)
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            return JSON.parse(jsonMatch[0]);
-        } else {
-            throw new Error("Invalid response format from AI");
-        }
-
-    } catch (error) {
-        console.error("AI Generation Error:", error);
-        throw error;
     }
+
+    throw lastError || new Error("All AI models failed to generate content.");
 };
