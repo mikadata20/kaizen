@@ -422,6 +422,8 @@ function App() {
             <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
               <ManualCreation />
             </div>
+
+
           ) : null}
         </div>
 

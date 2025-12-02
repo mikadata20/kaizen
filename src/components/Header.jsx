@@ -300,6 +300,7 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                     >
                         📘
                     </button>
+
                     <button
                         className="btn"
                         style={{

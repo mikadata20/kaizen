@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getAllProjects } from '../utils/database';
 import jsPDF from 'jspdf';
-import { generateManualContent } from '../utils/aiGenerator';
+import { generateManualContent, improveManualContent, validateApiKey } from '../utils/aiGenerator';
 
 function ManualCreation() {
     const [projects, setProjects] = useState([]);
@@ -12,6 +12,8 @@ function ManualCreation() {
 
     // AI State
     const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || '');
+    const [selectedModel, setSelectedModel] = useState(localStorage.getItem('gemini_model') || 'gemini-1.5-flash');
+    const [availableModels, setAvailableModels] = useState([]);
     const [showSettings, setShowSettings] = useState(false);
     const [generatingItems, setGeneratingItems] = useState({}); // { index: boolean }
 
@@ -94,20 +96,23 @@ function ManualCreation() {
         });
     };
 
-    const saveApiKey = (key) => {
+    const saveSettings = (key, model) => {
         setApiKey(key);
+        setSelectedModel(model);
         localStorage.setItem('gemini_api_key', key);
+        localStorage.setItem('gemini_model', model);
         setShowSettings(false);
     };
 
     const handleAiGenerate = async (index) => {
         const item = manualData[index];
-        const taskName = item.description;
 
-        if (!taskName) {
-            alert("Please ensure the description (task name) is filled before generating AI content.");
+        // Check if there is any content to improve
+        if (!item.description && !item.keyPoints && !item.safety) {
+            alert("Please enter some text in Description, Key Points, or Safety to improve.");
             return;
         }
+
         if (!apiKey) {
             setShowSettings(true);
             return;
@@ -116,19 +121,26 @@ function ManualCreation() {
         setGeneratingItems(prev => ({ ...prev, [index]: true }));
 
         try {
-            const content = await generateManualContent(taskName, apiKey);
+            // Use improveManualContent instead of generateManualContent
+            const content = await improveManualContent({
+                description: item.description,
+                keyPoints: item.keyPoints,
+                safety: item.safety
+            }, apiKey, selectedModel);
+
             setManualData(prev => {
                 const newData = [...prev];
                 newData[index] = {
                     ...newData[index],
                     description: content.description || newData[index].description,
-                    keyPoints: content.keyPoints || '',
-                    safety: content.safety || ''
+                    keyPoints: content.keyPoints || newData[index].keyPoints,
+                    safety: content.safety || newData[index].safety
                 };
                 return newData;
             });
         } catch (error) {
-            alert("AI Generation failed: " + error.message);
+            console.error("AI Error:", error);
+            alert("AI Improvement failed: " + error.message);
         } finally {
             setGeneratingItems(prev => ({ ...prev, [index]: false }));
         }
@@ -305,19 +317,68 @@ function ManualCreation() {
                     backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000,
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
-                    <div style={{ backgroundColor: '#252526', padding: '20px', borderRadius: '8px', width: '400px', border: '1px solid #444' }}>
+                    <div style={{ backgroundColor: '#252526', padding: '20px', borderRadius: '8px', width: '500px', border: '1px solid #444' }}>
                         <h3 style={{ marginTop: 0, color: 'white' }}>AI Settings</h3>
-                        <p style={{ color: '#ccc', fontSize: '0.9rem' }}>Enter your Google Gemini API Key to enable AI features.</p>
-                        <input
-                            type="password"
-                            placeholder="Enter API Key"
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                            style={{ width: '100%', padding: '8px', marginBottom: '15px', backgroundColor: '#333', border: '1px solid #555', color: 'white' }}
-                        />
+                        <p style={{ color: '#ccc', fontSize: '0.9rem' }}>Configure your Google Gemini API connection.</p>
+
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ display: 'block', color: '#ccc', marginBottom: '5px', fontSize: '0.9rem' }}>API Key</label>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <input
+                                    type="password"
+                                    placeholder="Enter API Key"
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    style={{ flex: 1, padding: '8px', backgroundColor: '#333', border: '1px solid #555', color: 'white', borderRadius: '4px' }}
+                                />
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            const models = await validateApiKey(apiKey);
+                                            setAvailableModels(models);
+                                            if (models.length > 0 && !models.includes(selectedModel)) {
+                                                setSelectedModel(models[0]);
+                                            }
+                                            alert(`✅ Connection Successful!\n\nFound ${models.length} available models.`);
+                                        } catch (err) {
+                                            alert(`❌ Connection Failed:\n${err.message}`);
+                                        }
+                                    }}
+                                    style={{ padding: '8px 12px', backgroundColor: '#2d2d2d', color: '#fff', border: '1px solid #555', cursor: 'pointer', borderRadius: '4px' }}
+                                >
+                                    Test Key
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', color: '#ccc', marginBottom: '5px', fontSize: '0.9rem' }}>AI Model</label>
+                            <select
+                                value={selectedModel}
+                                onChange={(e) => setSelectedModel(e.target.value)}
+                                style={{ width: '100%', padding: '8px', backgroundColor: '#333', border: '1px solid #555', color: 'white', borderRadius: '4px' }}
+                            >
+                                {availableModels.length > 0 ? (
+                                    availableModels.map(model => (
+                                        <option key={model} value={model}>{model}</option>
+                                    ))
+                                ) : (
+                                    <>
+                                        <option value="gemini-1.5-flash">gemini-1.5-flash (Default)</option>
+                                        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                                    </>
+                                )}
+                            </select>
+                            {availableModels.length === 0 && (
+                                <p style={{ color: '#888', fontSize: '0.8rem', marginTop: '5px' }}>
+                                    ℹ️ Click "Test Key" to fetch all available models for your key.
+                                </p>
+                            )}
+                        </div>
+
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                             <button onClick={() => setShowSettings(false)} style={{ padding: '8px 16px', backgroundColor: '#444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
-                            <button onClick={() => saveApiKey(apiKey)} style={{ padding: '8px 16px', backgroundColor: '#0078d4', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Save</button>
+                            <button onClick={() => saveSettings(apiKey, selectedModel)} style={{ padding: '8px 16px', backgroundColor: '#0078d4', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Save & Close</button>
                         </div>
                     </div>
                 </div>
@@ -412,7 +473,7 @@ function ManualCreation() {
                                                     display: 'flex', alignItems: 'center', gap: '4px'
                                                 }}
                                             >
-                                                {generatingItems[index] ? '✨ Generating...' : '✨ AI Assist'}
+                                                {generatingItems[index] ? '✨ Improving...' : '✨ AI Improve'}
                                             </button>
                                         </div>
                                         <span style={{ color: '#888' }}>{item.duration.toFixed(1)}s</span>
