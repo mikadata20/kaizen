@@ -2,6 +2,47 @@ import React from 'react';
 
 // Help content for each view
 export const helpContent = {
+    'action-recognition': {
+        title: '🤖 Action Recognition - Help',
+        content: (
+            <>
+                <h3 style={{ color: '#ffd700', marginTop: '20px' }}>📌 Fungsi</h3>
+                <p>Deteksi otomatis gerakan operator menggunakan AI dan klasifikasi ke dalam Therblig elements.</p>
+
+                <h3 style={{ color: '#ffd700', marginTop: '20px' }}>🚀 Cara Pakai</h3>
+                <ol>
+                    <li>Upload atau pilih video dari project</li>
+                    <li>Klik <strong>Start Detection</strong></li>
+                    <li>Tunggu proses selesai (progress bar akan muncul)</li>
+                    <li>Review detected actions di panel kanan</li>
+                    <li>Klik <strong>Export to Measurements</strong> untuk menambahkan ke element list</li>
+                </ol>
+
+                <h3 style={{ color: '#ffd700', marginTop: '20px' }}>🎯 Actions yang Dideteksi</h3>
+                <ul>
+                    <li><strong>Reach (R)</strong>: Gerakan tangan menuju objek</li>
+                    <li><strong>Grasp (G)</strong>: Menggenggam objek</li>
+                    <li><strong>Move (M)</strong>: Memindahkan objek</li>
+                    <li><strong>Position (P)</strong>: Memposisikan objek dengan presisi</li>
+                    <li><strong>Release (RL)</strong>: Melepas objek</li>
+                    <li><strong>Hold (H)</strong>: Menahan objek di tempat</li>
+                    <li><strong>Inspect (I)</strong>: Memeriksa/mengamati objek</li>
+                    <li><strong>Idle (ID)</strong>: Tidak ada aktivitas</li>
+                </ul>
+
+                <h3 style={{ color: '#ffd700', marginTop: '20px' }}>💡 Tips</h3>
+                <ul>
+                    <li>Pastikan operator terlihat jelas di video</li>
+                    <li>Hindari video dengan pencahayaan buruk</li>
+                    <li>Confidence score &gt;80% = deteksi akurat</li>
+                    <li>Anda bisa manual correction setelah export</li>
+                </ul>
+
+                <h3 style={{ color: '#ffd700', marginTop: '20px' }}>⚙️ Teknologi</h3>
+                <p>Menggunakan <strong>TensorFlow.js MoveNet</strong> untuk pose detection dan rule-based classifier untuk Therblig classification.</p>
+            </>
+        )
+    },
     'ml-data': {
         title: '🧠 Machine Learning Data - Help',
         content: (
@@ -79,7 +120,7 @@ export const helpContent = {
                 <h3 style={{ color: '#ffd700', marginTop: '20px' }}>💡 Tips</h3>
                 <ul>
                     <li>Minimal 10 cycles untuk statistik valid</li>
-                    <li>Cp/Cpk > 1.33 = Process Capable</li>
+                    <li>Cp/Cpk &gt; 1.33 = Process Capable</li>
                     <li>Export PDF Report untuk dokumentasi</li>
                 </ul>
             </>

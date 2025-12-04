@@ -26,6 +26,7 @@ import BroadcastManager from './components/features/BroadcastManager';
 import BroadcastViewer from './components/features/BroadcastViewer';
 import StreamHandler from './utils/streamHandler';
 import MachineLearningData from './components/MachineLearningData';
+import ActionRecognition from './components/ActionRecognition';
 import { saveProject, getProjectByName, updateProject } from './utils/database';
 import { importProject } from './utils/projectExport';
 import { LanguageProvider } from './i18n/LanguageContext';
@@ -426,6 +427,15 @@ function App() {
           ) : currentView === 'ml-data' ? (
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <MachineLearningData videoSrc={videoSrc} />
+            </div>
+          ) : currentView === 'action-recognition' ? (
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <ActionRecognition
+                videoSrc={videoSrc}
+                onActionsDetected={(actions) => {
+                  setMeasurements([...measurements, ...actions]);
+                }}
+              />
             </div>
           ) : null}
         </div>

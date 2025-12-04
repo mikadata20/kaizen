@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import PoseDetector from '../utils/poseDetector';
+import { initializePoseDetector, detectPose, disposeDetector } from '../utils/poseDetector';
 import AngleCalculator from '../utils/angleCalculator';
 import RULACalculator from '../utils/rulaCalculator';
 import REBACalculator from '../utils/rebaCalculator';
@@ -22,13 +22,12 @@ function ErgonomicAnalysis({ videoRef, onClose }) {
     // Initialize detector
     useEffect(() => {
         const initDetector = async () => {
-            const detector = new PoseDetector();
-            const success = await detector.initialize();
-
-            if (success) {
+            try {
+                const detector = await initializePoseDetector();
                 detectorRef.current = detector;
                 setStatus('Ready');
-            } else {
+            } catch (error) {
+                console.error('Failed to initialize pose detector:', error);
                 setStatus('Failed to load model');
             }
         };
@@ -36,9 +35,7 @@ function ErgonomicAnalysis({ videoRef, onClose }) {
         initDetector();
 
         return () => {
-            if (detectorRef.current) {
-                detectorRef.current.dispose();
-            }
+            disposeDetector();
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
@@ -56,13 +53,14 @@ function ErgonomicAnalysis({ videoRef, onClose }) {
         }
 
         // Detect pose
-        const detectedPose = await detectorRef.current.detectPose(video);
+        const poses = await detectPose(video);
 
-        if (detectedPose) {
+        if (poses && poses.length > 0) {
+            const detectedPose = poses[0];
             setPose(detectedPose);
 
             // Calculate angles
-            const keypoints = detectorRef.current.getKeypoints(detectedPose);
+            const keypoints = detectedPose.keypoints;
             const angles = angleCalculatorRef.current.calculateAllAngles(keypoints);
 
             // Calculate scores
