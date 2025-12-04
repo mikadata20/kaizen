@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { Play, Pause, RefreshCw, CheckCircle, AlertTriangle, Save, Upload, Camera } from 'lucide-react';
+import { Play, Pause, RefreshCw, CheckCircle, AlertTriangle, Save, Upload, Camera, HelpCircle } from 'lucide-react';
 
 const MachineLearningData = ({ videoSrc }) => {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
