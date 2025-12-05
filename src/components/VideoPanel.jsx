@@ -129,9 +129,9 @@ function VideoPanel({
     const measurements = session.measurements || [];
 
     return (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', overflow: 'visible' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', height: '100%', overflow: 'visible' }}>
             {/* Video Display */}
-            <div style={{ flex: 1, backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '4px', position: 'relative', minHeight: '200px' }}>
+            <div style={{ flexShrink: 0, maxHeight: '300px', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '4px', position: 'relative', minHeight: '200px' }}>
                 {session.videoUrl ? (
                     <div style={{
                         transform: `scale(${zoom})`,
@@ -326,7 +326,7 @@ function VideoPanel({
 
             {/* Elements List */}
             {measurements.length > 0 && (
-                <div style={{ backgroundColor: '#1a1a1a', padding: '8px', borderRadius: '4px', maxHeight: '180px', overflowY: 'auto', overflowX: 'auto' }}>
+                <div style={{ backgroundColor: '#1a1a1a', padding: '8px', borderRadius: '4px', maxHeight: '120px', overflowY: 'auto', overflowX: 'auto' }}>
                     <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '6px', fontWeight: 'bold' }}>
                         Elements ({measurements.length})
                     </div>

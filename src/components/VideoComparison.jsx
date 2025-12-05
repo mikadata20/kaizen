@@ -165,8 +165,8 @@ function VideoComparison() {
             </div>
 
             {/* Panels */}
-            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', overflow: 'hidden' }}>
-                <div style={{ border: '2px solid #4da6ff', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', overflow: 'auto' }}>
+                <div style={{ border: '2px solid #4da6ff', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
                     <VideoPanel
                         session={leftSession}
                         videoRef={leftVideoRef}
@@ -179,7 +179,7 @@ function VideoComparison() {
                         onTimeUpdate={(time) => handleTimeUpdate('left', time)}
                     />
                 </div>
-                <div style={{ border: '2px solid #0a5', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ border: '2px solid #0a5', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
                     <VideoPanel
                         session={rightSession}
                         videoRef={rightVideoRef}
