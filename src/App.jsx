@@ -119,6 +119,13 @@ function App() {
     setCurrentView('dashboard');
   };
 
+  // Load video from Knowledge Base
+  const handleLoadVideoFromKB = (videoUrl, videoTitle) => {
+    setVideoSrc(videoUrl);
+    setVideoName(videoTitle || 'Knowledge Base Video');
+    setCurrentView('dashboard'); // Show VideoWorkspace
+  };
+
   // Project management handlers
   const handleNewProject = async (projectName, videoFile) => {
     try {
@@ -454,7 +461,7 @@ function App() {
             </div>
           ) : currentView === 'knowledge-base' ? (
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <KnowledgeBase />
+              <KnowledgeBase onLoadVideo={handleLoadVideoFromKB} />
             </div>
           ) : null}
         </div>

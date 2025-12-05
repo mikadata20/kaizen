@@ -93,21 +93,36 @@ export const getKnowledgeBaseItem = async (id) => {
 
 export const updateKnowledgeBaseItem = async (id, updates) => {
     const db = await initKnowledgeBaseDB();
-    const transaction = db.transaction(['knowledgeBase'], 'readwrite');
-    const store = transaction.objectStore('knowledgeBase');
 
-    const item = await getKnowledgeBaseItem(id);
+    // First, get the existing item
+    const getTransaction = db.transaction(['knowledgeBase'], 'readonly');
+    const getStore = getTransaction.objectStore('knowledgeBase');
+    const getRequest = getStore.get(id);
+
+    const item = await new Promise((resolve, reject) => {
+        getRequest.onsuccess = () => resolve(getRequest.result);
+        getRequest.onerror = () => reject(getRequest.error);
+    });
+
+    if (!item) {
+        throw new Error(`Item with id ${id} not found`);
+    }
+
+    // Then, update in a new transaction
+    const updateTransaction = db.transaction(['knowledgeBase'], 'readwrite');
+    const updateStore = updateTransaction.objectStore('knowledgeBase');
+
     const updatedItem = {
         ...item,
         ...updates,
         updatedAt: new Date().toISOString()
     };
 
-    const request = store.put(updatedItem);
+    const updateRequest = updateStore.put(updatedItem);
 
     return new Promise((resolve, reject) => {
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        updateRequest.onsuccess = () => resolve(updateRequest.result);
+        updateRequest.onerror = () => reject(updateRequest.error);
     });
 };
 
@@ -252,11 +267,13 @@ export const getRatingsForItem = async (kbId) => {
 
 export const incrementViewCount = async (id) => {
     const item = await getKnowledgeBaseItem(id);
+    if (!item) return;
     return updateKnowledgeBaseItem(id, { viewCount: (item.viewCount || 0) + 1 });
 };
 
 export const incrementUsageCount = async (id) => {
     const item = await getKnowledgeBaseItem(id);
+    if (!item) return;
     return updateKnowledgeBaseItem(id, { usageCount: (item.usageCount || 0) + 1 });
 };
 

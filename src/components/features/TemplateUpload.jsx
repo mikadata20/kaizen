@@ -35,7 +35,7 @@ function TemplateUpload({ onClose, onComplete }) {
         const file = e.target.files[0];
         if (file) {
             setVideoFile(file);
-            // Create local URL for video
+            // Create local URL for preview
             const url = URL.createObjectURL(file);
             setVideoUrl(url);
         }
@@ -56,7 +56,8 @@ function TemplateUpload({ onClose, onComplete }) {
                 category: formData.category,
                 industry: formData.industry,
                 operationType: formData.operationType,
-                contentUrl: videoUrl || null,
+                // Store the actual video Blob, not the URL
+                videoBlob: videoFile || null,
                 templateData: formData.type === 'template' ? {
                     // This would be populated from current project data
                     measurements: [],

@@ -10,7 +10,7 @@ import {
 import KnowledgeBaseDetail from './features/KnowledgeBaseDetail';
 import TemplateUpload from './features/TemplateUpload';
 
-function KnowledgeBase() {
+function KnowledgeBase({ onLoadVideo }) {
     const [items, setItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -32,8 +32,18 @@ function KnowledgeBase() {
 
     const loadItems = async () => {
         const allItems = await getAllKnowledgeBaseItems();
-        setItems(allItems);
-        setFilteredItems(sortKnowledgeBase(allItems, sortBy));
+        // Create Blob URLs for video items
+        const itemsWithUrls = allItems.map(item => {
+            if (item.videoBlob && item.videoBlob instanceof Blob) {
+                return {
+                    ...item,
+                    contentUrl: URL.createObjectURL(item.videoBlob)
+                };
+            }
+            return item;
+        });
+        setItems(itemsWithUrls);
+        setFilteredItems(sortKnowledgeBase(itemsWithUrls, sortBy));
     };
 
     const loadTags = async () => {
@@ -389,6 +399,7 @@ function KnowledgeBase() {
                         setSelectedItem(null);
                         loadItems();
                     }}
+                    onLoadVideo={onLoadVideo}
                 />
             )}
 

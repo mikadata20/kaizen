@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { X, Star, ThumbsUp, Download, Play, ExternalLink, TrendingUp, Eye, Calendar, Tag } from 'lucide-react';
+import { X, Star, ThumbsUp, Download, Play, ExternalLink, TrendingUp, Eye, Calendar, Tag, Trash } from 'lucide-react';
 import {
     getKnowledgeBaseItem,
     getTagsForItem,
     getRatingsForItem,
     addRating,
-    incrementUsageCount
+    incrementUsageCount,
+    deleteKnowledgeBaseItem
 } from '../../utils/knowledgeBaseDB';
 
-function KnowledgeBaseDetail({ item, onClose }) {
+function KnowledgeBaseDetail({ item, onClose, onLoadVideo }) {
     const [tags, setTags] = useState([]);
     const [ratings, setRatings] = useState([]);
     const [userRating, setUserRating] = useState(0);
     const [userFeedback, setUserFeedback] = useState('');
     const [showRatingForm, setShowRatingForm] = useState(false);
+    const [videoUrl, setVideoUrl] = useState(item.contentUrl || null);
 
     useEffect(() => {
         loadDetails();
+        // Create Blob URL if video has Blob but no URL
+        if (item.videoBlob && item.videoBlob instanceof Blob && !item.contentUrl) {
+            const url = URL.createObjectURL(item.videoBlob);
+            setVideoUrl(url);
+        }
     }, [item.id]);
 
     const loadDetails = async () => {
@@ -47,6 +54,19 @@ function KnowledgeBaseDetail({ item, onClose }) {
             alert('Template loaded! Creating new project...');
             // TODO: Implement actual template loading logic
             onClose();
+        }
+    };
+
+    const handleDelete = async () => {
+        if (confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`)) {
+            try {
+                await deleteKnowledgeBaseItem(item.id);
+                alert('Item deleted successfully!');
+                onClose(); // This will trigger parent to reload items
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                alert('Error deleting item. Please try again.');
+            }
         }
     };
 
@@ -165,11 +185,11 @@ function KnowledgeBaseDetail({ item, onClose }) {
                     )}
 
                     {/* Video Player */}
-                    {item.type === 'video' && item.contentUrl && (
+                    {item.type === 'video' && videoUrl && (
                         <div style={{ marginBottom: '20px' }}>
                             <h3 style={{ color: '#00d2ff', fontSize: '1rem', marginBottom: '10px' }}>Video</h3>
                             <video
-                                src={item.contentUrl}
+                                src={videoUrl}
                                 controls
                                 style={{
                                     width: '100%',
@@ -324,6 +344,34 @@ function KnowledgeBaseDetail({ item, onClose }) {
                     gap: '10px',
                     justifyContent: 'flex-end'
                 }}>
+                    {item.type === 'video' && onLoadVideo && (
+                        <button
+                            onClick={() => {
+                                const urlToUse = videoUrl || item.contentUrl;
+                                if (urlToUse) {
+                                    onLoadVideo(urlToUse, item.title);
+                                    onClose();
+                                } else {
+                                    alert('Video URL not available. Please re-upload the video.');
+                                }
+                            }}
+                            style={{
+                                padding: '12px 24px',
+                                backgroundColor: (videoUrl || item.contentUrl) ? '#4da6ff' : '#666',
+                                border: 'none',
+                                borderRadius: '6px',
+                                color: '#fff',
+                                cursor: (videoUrl || item.contentUrl) ? 'pointer' : 'not-allowed',
+                                fontWeight: 'bold',
+                                fontSize: '1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}
+                        >
+                            <Play size={18} /> Open in Video Workspace
+                        </button>
+                    )}
                     {item.type === 'template' && (
                         <button
                             onClick={handleUseTemplate}
@@ -341,6 +389,24 @@ function KnowledgeBaseDetail({ item, onClose }) {
                             Use This Template
                         </button>
                     )}
+                    <button
+                        onClick={handleDelete}
+                        style={{
+                            padding: '12px 24px',
+                            backgroundColor: '#dc3545',
+                            border: 'none',
+                            borderRadius: '6px',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            fontSize: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <Trash size={18} /> Delete
+                    </button>
                     <button
                         onClick={onClose}
                         style={{
