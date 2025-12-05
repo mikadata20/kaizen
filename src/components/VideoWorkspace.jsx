@@ -82,7 +82,7 @@ function VideoWorkspace({
         const updateGlobalRef = () => {
             if (videoRef.current) {
                 window.__motionVideoElement = videoRef.current;
-                console.log('[VideoWorkspace] Updated global video reference');
+                // console.log('[VideoWorkspace] Updated global video reference');
             }
         };
 
@@ -95,7 +95,7 @@ function VideoWorkspace({
         return () => {
             clearInterval(interval);
             window.__motionVideoElement = null;
-            console.log('[VideoWorkspace] Cleared global video reference');
+            // console.log('[VideoWorkspace] Cleared global video reference');
         };
     }, [videoRef, videoSrc, isWebcamActive, isStreamConnected]);
 

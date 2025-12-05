@@ -56,6 +56,8 @@ function Help() {
 📑 **Multi-Axial** - Analisis multi-project (Man-Machine/Two-Hand)
 📘 **Manual** - Pembuatan manual kerja (Work Instruction)
 🧠 **ML Data** - Machine Learning Consistency Check
+📹 **Multi-Camera** - Analisis 3D Fusion dari 2 sudut pandang
+🥽 **VR Training** - Mode pelatihan immersive untuk operator baru
 ❓ **Help** - Panduan penggunaan aplikasi
 
 **Element Editor Tools:**
@@ -542,6 +544,80 @@ Analisis konsistensi gerakan operator menggunakan konsep Machine Learning dengan
 • Threshold 80% = batas minimum konsistensi
 • Anomaly tinggi = perlu retraining operator
             `
+        },
+        multicamera: {
+            title: '📹 Multi-Camera 3D Fusion',
+            content: `
+**Fungsi:**
+Analisis ergonomi RULA/REBA yang lebih akurat dengan menggabungkan data dari 2 sudut pandang kamera (Front & Side View).
+
+**Cara Pakai:**
+
+1. Klik icon 📹 di header
+2. **Pilih Video:**
+   • FRONT VIEW (X-Axis): Video tampak depan
+   • SIDE VIEW (Z-Axis): Video tampak samping
+3. **Sinkronisasi:**
+   • Kedua video diputar bersamaan
+   • Kontrol Play/Pause, Speed, Zoom
+4. **Mulai Analisis:**
+   • Klik "Start 3D Fusion Analysis"
+   • Skeleton overlay muncul pada kedua video
+5. **Lihat Hasil:**
+   • RULA/REBA scores di panel kanan
+   • Skor real-time saat video berjalan
+
+**Keunggulan:**
+✅ Trunk Flexion lebih akurat (Side View Z-axis)
+✅ Shoulder Abduction lebih akurat (Front View X-axis)
+✅ Presisi tinggi dari kombinasi 2 view
+
+**Tips:**
+• Kedua video harus merekam aktivitas yang sama
+• Posisikan kamera tegak lurus (90°)
+• Gunakan slow speed (0.5x) untuk detail
+            `
+        },
+        vrtraining: {
+            title: '🥽 VR Training Mode',
+            content: `
+**Fungsi:**
+Mode pelatihan immersive untuk operator baru dengan instruksi step-by-step yang disinkronkan dengan video Standard Work.
+
+**Cara Pakai:**
+
+1. Klik icon 🥽 di header
+2. **Persiapan:**
+   • Project harus punya measurements
+   • Video sudah di-load
+3. **Mulai Training:**
+   • Klik Play atau tekan Spacebar
+   • HUD menampilkan step saat ini otomatis
+4. **Navigasi:**
+   • Previous/Next atau arrow keys
+   • "Enter VR" untuk fullscreen
+5. **Drawing (Opsional):**
+   • Klik "🖊 Drawing Tools"
+   • Pilih tool (pen, arrow, circle, dll)
+   • Gambar di video untuk highlight
+
+**Fitur:**
+• Immersive Video Player dengan zoom 50%-300%
+• HUD: Current Step, Next Step, Progress Bar
+• Drawing Tools: Pen, Line, Arrow, Rectangle, Circle, Text
+• 6 Colors: Cyan, Red, Green, Yellow, Magenta, White
+
+**Keyboard Shortcuts:**
+• Space: Play/Pause
+• ← →: Previous/Next Step
+• F: Toggle Fullscreen
+
+**Use Case:**
+• Training operator baru
+• Refresher training
+• Quality control training
+• Safety procedure training
+            `
         }
     };
 
@@ -626,7 +702,7 @@ Analisis konsistensi gerakan operator menggunakan konsep Machine Learning dengan
 
                 {/* Footer Info */}
                 <div style={{ textAlign: 'center', color: '#666', fontSize: '0.85rem', padding: '10px' }}>
-                    <p>MAVi v2.1 - Motion Analysis & Visualization</p>
+                    <p>MAVi v2.3 - Motion Analysis & Visualization</p>
                     <p>Untuk panduan lengkap, lihat file: <code style={{ backgroundColor: '#2a2a2a', padding: '2px 6px', borderRadius: '3px' }}>PANDUAN_PENGGUNAAN.md</code></p>
                 </div>
             </div>

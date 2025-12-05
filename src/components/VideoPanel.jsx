@@ -129,7 +129,7 @@ function VideoPanel({
     const measurements = session.measurements || [];
 
     return (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', overflow: 'visible' }}>
             {/* Video Display */}
             <div style={{ flex: 1, backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '4px', position: 'relative', minHeight: '200px' }}>
                 {session.videoUrl ? (

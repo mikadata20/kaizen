@@ -60,6 +60,8 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 | 📑 | Multi-Axial | Analisis multi-project (Man-Machine/Two-Hand) |
 | 📘 | Manual | Pembuatan manual kerja (Work Instruction) |
 | 🧠 | ML Data | Machine Learning Consistency Check |
+| 📹 | Multi-Camera | Analisis 3D Fusion dari 2 sudut pandang |
+| 🥽 | VR Training | Mode pelatihan immersive untuk operator baru |
 | ❓ | Help | Panduan penggunaan |
 
 ---
@@ -382,6 +384,132 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 
 ---
 
+### 20. 📹 Multi-Camera 3D Fusion (BARU!)
+
+**🎯 Tujuan:** Menghasilkan analisis ergonomi RULA/REBA yang lebih akurat dengan menggabungkan data dari 2 sudut pandang kamera (Front & Side View).
+
+**Konsep:**
+- **Single Camera**: Hanya menangkap 2 dimensi (X-Y atau Y-Z)
+- **Multi-Camera 3D Fusion**: Menggabungkan Front View (X-axis) dan Side View (Z-axis) untuk analisis 3D lengkap
+
+**Fitur:**
+- **Dual Video Players**: Tampilan side-by-side untuk Front dan Side view
+- **Synchronized Playback**: Kedua video diputar bersamaan
+- **Dual Pose Detection**: MediaPipe Pose pada kedua video secara simultan
+- **Fusion Calculator**: Menggabungkan sudut terbaik dari setiap view
+- **Real-time RULA/REBA**: Skor ergonomi yang lebih presisi
+
+**Cara Pakai:**
+1. Klik icon 📹 di header
+2. **Pilih Video:**
+   - **FRONT VIEW (X-Axis)**: Pilih video tampak depan dari dropdown
+   - **SIDE VIEW (Z-Axis)**: Pilih video tampak samping dari dropdown
+3. **Sinkronisasi:**
+   - Kedua video akan diputar bersamaan
+   - Gunakan kontrol Play/Pause, Speed, dan Zoom
+4. **Mulai Analisis:**
+   - Klik **"Start 3D Fusion Analysis"**
+   - Sistem akan mendeteksi pose dari kedua sudut
+   - Skeleton overlay muncul pada kedua video
+5. **Lihat Hasil:**
+   - RULA/REBA scores ditampilkan di panel kanan
+   - Skor diperbarui real-time saat video berjalan
+
+**Keunggulan 3D Fusion:**
+- ✅ **Trunk Flexion**: Lebih akurat dari Side View (depth Z-axis)
+- ✅ **Shoulder Abduction**: Lebih akurat dari Front View (width X-axis)
+- ✅ **Neck Twist**: Kombinasi dari kedua view
+- ✅ **Presisi Tinggi**: Mengurangi error dari single-camera analysis
+
+**Tips:**
+- Pastikan kedua video merekam aktivitas yang sama secara bersamaan
+- Posisikan kamera tegak lurus (90°) satu sama lain untuk hasil optimal
+- Gunakan kecepatan lambat (0.5x) untuk analisis detail
+- Zoom untuk melihat postur yang lebih jelas
+
+---
+
+### 21. 🥽 VR Training Mode (BARU!)
+
+**🎯 Tujuan:** Mode pelatihan immersive untuk operator baru dengan instruksi step-by-step yang disinkronkan dengan video Standard Work.
+
+**Konsep:**
+- Pelatihan berbasis video dengan overlay instruksi
+- Heads-Up Display (HUD) menampilkan langkah kerja saat ini
+- Fullscreen mode untuk pengalaman immersive
+- Drawing tools untuk highlight area penting
+
+**Fitur:**
+1. **Immersive Video Player:**
+   - Fullscreen capable dengan dark UI
+   - Synchronized playback dengan measurement data
+   - Zoom 50%-300% untuk detail
+
+2. **Heads-Up Display (HUD):**
+   - **Current Step**: Overlay besar menampilkan langkah saat ini
+   - **Next Step Preview**: Preview langkah berikutnya
+   - **Progress Bar**: Indikator visual progres pelatihan
+   - **Training Info**: Nama project/video
+   - **Time Display**: Current time / Total duration
+
+3. **Navigation Controls:**
+   - **Play/Pause**: Kontrol pemutaran (Spacebar)
+   - **Previous/Next Step**: Navigasi antar elemen kerja (Arrow keys)
+   - **Enter VR**: Toggle fullscreen mode (F key)
+   - **Zoom Controls**: Perbesar/perkecil video
+
+4. **Drawing Tools:**
+   - 🖊 **Pen**: Freehand drawing
+   - — **Line**: Garis lurus
+   - → **Arrow**: Panah penunjuk
+   - ▢ **Rectangle**: Kotak/persegi
+   - ○ **Circle**: Lingkaran
+   - T **Text**: Anotasi teks
+   - **6 Colors**: Cyan, Red, Green, Yellow, Magenta, White
+   - **Adjustable Width**: 1-10px line thickness
+   - **Clear All**: Hapus semua anotasi
+
+**Cara Pakai:**
+1. Klik icon 🥽 di header
+2. **Persiapan:**
+   - Pastikan project memiliki measurements (Standard Work elements)
+   - Video sudah di-load
+3. **Mulai Training:**
+   - Klik **Play** atau tekan `Spacebar`
+   - HUD akan menampilkan step saat ini secara otomatis
+4. **Navigasi:**
+   - Gunakan tombol **Previous/Next** atau arrow keys
+   - Klik **"Enter VR"** untuk fullscreen immersive mode
+5. **Drawing (Opsional):**
+   - Klik **"🖊 Drawing Tools"** (pojok kiri atas)
+   - Pilih tool (pen, arrow, circle, dll)
+   - Pilih warna
+   - Gambar langsung di video untuk highlight area penting
+   - Klik **Close** untuk menutup toolbar
+
+**Keyboard Shortcuts:**
+- `Space`: Play/Pause
+- `←` `→`: Previous/Next Step
+- `F`: Toggle Fullscreen
+
+**Use Case:**
+- Training operator baru dengan visual guide
+- Refresher training untuk operator existing
+- Dokumentasi visual Standard Work
+- Quality control training
+- Safety procedure training
+
+**Tips:**
+- Gunakan drawing tools untuk highlight:
+  - Area berbahaya (safety)
+  - Posisi tangan yang benar
+  - Lokasi tools/parts
+  - Sequence yang critical
+- Fullscreen mode untuk fokus maksimal
+- Slow speed (0.5x) untuk langkah kompleks
+
+---
+
 ## 📝 Panduan Step-by-Step
 
 ### Workflow 1: Analisis Video Baru
@@ -412,7 +540,13 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 
 ## 📈 Update Log
 
-### Version 2.2 (Current)
+### Version 2.3 (Current)
+- ✅ **New**: Multi-Camera 3D Fusion (Dual-view ergonomic analysis)
+- ✅ **New**: VR Training Mode (Immersive operator training)
+- ✅ **New**: Drawing Tools in VR Training (Pen, Arrow, Circle, Rectangle, Line, Text)
+- ✅ **Update**: Enhanced video playback controls
+
+### Version 2.2
 - ✅ **New**: Machine Learning Data (Consistency Check with Golden Cycle)
 - ✅ **New**: Multi-Axial Analysis (Man-Machine / Two-Hand Chart)
 - ✅ **New**: Standard Work Combination Sheet (SWCS) PDF Export

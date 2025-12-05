@@ -206,7 +206,7 @@ function MultiCameraFusion() {
                             {sessions.map(s => <option key={s.id} value={s.id}>{s.videoName}</option>)}
                         </select>
                     </div>
-                    <div style={{ flex: 1, position: 'relative', backgroundColor: '#000', borderRadius: '8px', overflow: 'hidden', border: '2px solid #4da6ff' }}>
+                    <div style={{ flex: 1, position: 'relative', backgroundColor: '#000', borderRadius: '8px', overflowY: 'auto', border: '2px solid #4da6ff', display: 'flex', flexDirection: 'column' }}>
                         <VideoPanel
                             session={frontSession}
                             videoRef={frontVideoRef}
@@ -244,7 +244,7 @@ function MultiCameraFusion() {
                             {sessions.map(s => <option key={s.id} value={s.id}>{s.videoName}</option>)}
                         </select>
                     </div>
-                    <div style={{ flex: 1, position: 'relative', backgroundColor: '#000', borderRadius: '8px', overflow: 'hidden', border: '2px solid #0a5' }}>
+                    <div style={{ flex: 1, position: 'relative', backgroundColor: '#000', borderRadius: '8px', overflowY: 'auto', border: '2px solid #0a5', display: 'flex', flexDirection: 'column' }}>
                         <VideoPanel
                             session={sideSession}
                             videoRef={sideVideoRef}

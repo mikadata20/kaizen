@@ -34,6 +34,7 @@ import { LanguageProvider } from './i18n/LanguageContext';
 import CollaborationOverlay from './components/features/CollaborationOverlay';
 import BroadcastControls from './components/features/BroadcastControls';
 import MultiCameraFusion from './components/MultiCameraFusion';
+import VRTrainingMode from './components/VRTrainingMode';
 import './index.css';
 
 function App() {
@@ -426,6 +427,10 @@ function App() {
             <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
               <ManualCreation />
             </div>
+          ) : currentView === 'ml-data' ? (
+            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+              <MachineLearningData videoSrc={videoSrc} />
+            </div>
           ) : currentView === 'spaghetti-chart' ? (
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <SpaghettiChart
@@ -436,6 +441,15 @@ function App() {
           ) : currentView === 'multi-camera' ? (
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <MultiCameraFusion />
+            </div>
+          ) : currentView === 'vr-training' ? (
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <VRTrainingMode
+                measurements={measurements}
+                videoSrc={videoSrc}
+                videoName={videoName}
+                currentProject={currentProject}
+              />
             </div>
           ) : null}
         </div>
