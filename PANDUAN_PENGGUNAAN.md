@@ -62,6 +62,7 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 | 🧠 | ML Data | Machine Learning Consistency Check |
 | 📹 | Multi-Camera | Analisis 3D Fusion dari 2 sudut pandang |
 | 🥽 | VR Training | Mode pelatihan immersive untuk operator baru |
+| 📚 | Knowledge Base | Repository templates & best practices |
 | ❓ | Help | Panduan penggunaan |
 
 ---
@@ -510,6 +511,116 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 
 ---
 
+### 22. 📚 Knowledge Base & Best Practices Library (BARU!)
+
+**🎯 Tujuan:** Repository of standard work dan best practices untuk standardisasi metode kerja across plants/lines.
+
+**Konsep:**
+- Central library untuk templates, videos, documents, dan best practices
+- Searchable dan filterable knowledge base
+- Rating dan feedback system
+- Tag-based organization
+- Usage tracking untuk popularity metrics
+
+**Fitur:**
+1. **Template Library:**
+   - Save project sebagai template
+   - Reuse template untuk project baru
+   - Template info (elements, total time)
+
+2. **Video Best Practices:**
+   - Upload video tutorials
+   - Video player built-in
+   - Local storage support
+
+3. **Search & Filter:**
+   - Real-time text search
+   - Filter by Type (Template, Video, Document, Best Practice)
+   - Filter by Category (Manufacturing, Assembly, Logistics, dll)
+   - Filter by Industry (Automotive, Electronics, dll)
+
+4. **Rating System:**
+   - 5-star rating
+   - User feedback/reviews
+   - Average rating display
+   - Rating count
+
+5. **Organization:**
+   - Tag-based categorization
+   - Multiple tags per item
+   - Tag autocomplete
+
+6. **View Modes:**
+   - Grid view (card layout)
+   - List view (table layout)
+   - Toggle between views
+
+7. **Statistics:**
+   - View count tracking
+   - Usage count tracking
+   - Most used items
+   - Highest rated items
+
+**Cara Pakai:**
+
+**Menambah Item Baru:**
+1. Klik icon 📚 di header
+2. Klik **"+ Add New Item"**
+3. Isi form:
+   - Title (required)
+   - Description (required)
+   - Type (Template/Video/Document/Best Practice)
+   - Upload video (jika type = video)
+   - Category dan Industry
+   - Tags (add multiple)
+4. Klik **"Save Item"**
+
+**Browse & Search:**
+1. Gunakan search bar untuk text search
+2. Klik **"Filters"** untuk filter panel
+3. Pilih Type, Category, Industry
+4. Sort by: Newest, Most Used, Highest Rated, Title
+5. Toggle Grid/List view
+6. Klik item card untuk detail
+
+**Rating Item:**
+1. Buka item detail
+2. Klik **"Rate This Item"**
+3. Pilih rating (1-5 stars)
+4. Opsional: tambah feedback text
+5. Klik **"Submit Rating"**
+
+**Menggunakan Template:**
+1. Cari template di knowledge base
+2. Klik untuk buka detail
+3. Review template info
+4. Klik **"Use This Template"**
+5. Project baru dibuat dengan template data
+
+**Database:**
+- IndexedDB (local browser storage)
+- 3 stores: knowledgeBase, kbTags, kbRatings
+- Auto-save semua data
+- Persistent across sessions
+
+**Use Case:**
+- Standardisasi work methods across plants
+- Share best practices antar team
+- Training material repository
+- Template reuse untuk efficiency
+- Knowledge retention
+- Continuous improvement documentation
+
+**Tips:**
+- Tag items dengan keywords yang relevan
+- Upload video dengan quality bagus
+- Beri rating dan feedback untuk help others
+- Gunakan descriptive titles
+- Update templates secara berkala
+- Share successful methods sebagai best practices
+
+---
+
 ## 📝 Panduan Step-by-Step
 
 ### Workflow 1: Analisis Video Baru
@@ -544,6 +655,7 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 - ✅ **New**: Multi-Camera 3D Fusion (Dual-view ergonomic analysis)
 - ✅ **New**: VR Training Mode (Immersive operator training)
 - ✅ **New**: Drawing Tools in VR Training (Pen, Arrow, Circle, Rectangle, Line, Text)
+- ✅ **New**: Knowledge Base & Best Practices Library (Templates, Videos, Rating System)
 - ✅ **Update**: Enhanced video playback controls
 
 ### Version 2.2

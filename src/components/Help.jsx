@@ -58,6 +58,7 @@ function Help() {
 🧠 **ML Data** - Machine Learning Consistency Check
 📹 **Multi-Camera** - Analisis 3D Fusion dari 2 sudut pandang
 🥽 **VR Training** - Mode pelatihan immersive untuk operator baru
+📚 **Knowledge Base** - Repository templates & best practices
 ❓ **Help** - Panduan penggunaan aplikasi
 
 **Element Editor Tools:**
@@ -617,6 +618,65 @@ Mode pelatihan immersive untuk operator baru dengan instruksi step-by-step yang 
 • Refresher training
 • Quality control training
 • Safety procedure training
+            `
+        },
+        knowledgebase: {
+            title: '📚 Knowledge Base & Best Practices',
+            content: `
+**Fungsi:**
+Repository of standard work dan best practices untuk standardisasi metode kerja across plants/lines.
+
+**Cara Pakai:**
+
+**Menambah Item:**
+1. Klik icon 📚 di header
+2. Klik "+ Add New Item"
+3. Isi title, description, type
+4. Upload video (jika type = video)
+5. Pilih category dan industry
+6. Add tags
+7. Save
+
+**Browse & Search:**
+1. Search bar untuk text search
+2. Filters untuk Type/Category/Industry
+3. Sort by: Newest, Most Used, Highest Rated
+4. Grid/List view toggle
+5. Klik item untuk detail
+
+**Rating:**
+1. Buka item detail
+2. Klik "Rate This Item"
+3. Pilih 1-5 stars
+4. Add feedback (optional)
+5. Submit
+
+**Use Template:**
+1. Find template
+2. Open detail
+3. Click "Use This Template"
+4. New project created
+
+**Fitur:**
+• Template library (save & reuse projects)
+• Video best practices (upload & share)
+• Search & filter (Type, Category, Industry)
+• Rating system (5-star + feedback)
+• Tag organization
+• Usage tracking
+• View modes (Grid/List)
+
+**Database:**
+• IndexedDB (local storage)
+• Auto-save
+• Persistent data
+
+**Use Case:**
+• Standardization across plants
+• Share best practices
+• Training materials
+• Template reuse
+• Knowledge retention
             `
         }
     };
