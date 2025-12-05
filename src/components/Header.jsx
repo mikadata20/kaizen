@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import LanguageSelector from './LanguageSelector';
 import { useLanguage } from '../i18n/LanguageContext';
+import GlobalSettingsDialog from './GlobalSettingsDialog';
 
 function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessionManager, theme, toggleTheme, onLogout, sidebarCollapsed }) {
     const { t } = useLanguage();
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     return (
         <header style={{
@@ -303,6 +305,23 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                     <button
                         className="btn"
                         style={{
+                            backgroundColor: currentView === 'spaghetti-chart' ? 'var(--accent-blue)' : '',
+                            padding: '8px',
+                            fontSize: '1.2rem',
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                        onClick={() => setCurrentView('spaghetti-chart')}
+                        title="Spaghetti Chart"
+                    >
+                        🍝
+                    </button>
+                    <button
+                        className="btn"
+                        style={{
                             backgroundColor: currentView === 'ml-data' ? 'var(--accent-blue)' : '',
                             padding: '8px',
                             fontSize: '1.2rem',
@@ -484,6 +503,35 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                         id="header-logo-upload"
                         style={{ display: 'none' }}
                     />
+                </div>
+            )}
+
+            <GlobalSettingsDialog
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+            />
+
+            {/* Settings Button (Always visible at bottom or integrated) */}
+            {!sidebarCollapsed && (
+                <div style={{ marginTop: 'auto', marginBottom: '10px' }}>
+                    <button
+                        className="btn"
+                        onClick={() => setIsSettingsOpen(true)}
+                        title="AI Settings"
+                        style={{
+                            padding: '8px',
+                            fontSize: '1.2rem',
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: '#333',
+                            border: '1px solid #555'
+                        }}
+                    >
+                        ⚙️
+                    </button>
                 </div>
             )}
         </header>

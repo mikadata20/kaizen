@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Header from './components/Header';
+import SessionManager from './components/SessionManager';
 import VideoWorkspace from './components/VideoWorkspace';
+import Header from './components/Header';
 import AnalysisDashboard from './components/AnalysisDashboard';
 import ElementRearrangement from './components/ElementRearrangement';
 import CycleTimeAnalysis from './components/CycleTimeAnalysis';
@@ -11,7 +12,6 @@ import BestWorstCycle from './components/BestWorstCycle';
 import VideoComparison from './components/VideoComparison';
 import Help from './components/Help';
 import TherbligAnalysis from './components/TherbligAnalysis';
-import SessionManager from './components/SessionManager';
 import NewProjectDialog from './components/NewProjectDialog';
 import OpenProjectDialog from './components/OpenProjectDialog';
 import Login from './components/Login';
@@ -27,11 +27,13 @@ import BroadcastViewer from './components/features/BroadcastViewer';
 import StreamHandler from './utils/streamHandler';
 import MachineLearningData from './components/MachineLearningData';
 import ActionRecognition from './components/ActionRecognition';
+import SpaghettiChart from './components/SpaghettiChart';
 import { saveProject, getProjectByName, updateProject } from './utils/database';
 import { importProject } from './utils/projectExport';
 import { LanguageProvider } from './i18n/LanguageContext';
 import CollaborationOverlay from './components/features/CollaborationOverlay';
 import BroadcastControls from './components/features/BroadcastControls';
+import MultiCameraFusion from './components/MultiCameraFusion';
 import './index.css';
 
 function App() {
@@ -355,7 +357,7 @@ function App() {
             </div>
           </div>
 
-          {/* Other views */}
+
           {currentView === 'analysis' ? (
             <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
               <AnalysisDashboard measurements={measurements} />
@@ -424,18 +426,16 @@ function App() {
             <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
               <ManualCreation />
             </div>
-          ) : currentView === 'ml-data' ? (
+          ) : currentView === 'spaghetti-chart' ? (
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <MachineLearningData videoSrc={videoSrc} />
-            </div>
-          ) : currentView === 'action-recognition' ? (
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <ActionRecognition
-                videoSrc={videoSrc}
-                onActionsDetected={(actions) => {
-                  setMeasurements([...measurements, ...actions]);
-                }}
+              <SpaghettiChart
+                currentProject={currentProject}
+                projectMeasurements={measurements}
               />
+            </div>
+          ) : currentView === 'multi-camera' ? (
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <MultiCameraFusion />
             </div>
           ) : null}
         </div>

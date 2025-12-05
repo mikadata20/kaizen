@@ -168,20 +168,83 @@ class AngleCalculator {
     }
 
     /**
-     * Calculate all angles for ergonomic analysis
+     * Calculate trunk twist (rotation)
      * @param {Object} keypoints - All keypoints
-     * @param {string} side - 'left' or 'right' (for arm analysis)
+     * @returns {number} Angle in degrees (approximate)
+     */
+    calculateTrunkTwist(keypoints) {
+        const leftShoulder = keypoints.left_shoulder;
+        const rightShoulder = keypoints.right_shoulder;
+        const leftHip = keypoints.left_hip;
+        const rightHip = keypoints.right_hip;
+
+        if (!leftShoulder || !rightShoulder || !leftHip || !rightHip) return 0;
+
+        // Calculate shoulder width and hip width
+        const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
+        const hipWidth = Math.abs(leftHip.x - rightHip.x);
+
+        // Simple heuristic: if shoulders are much narrower than expected relative to hips (or vice versa),
+        // it implies rotation. However, without depth, this is just a guess.
+        // A better 2D proxy is the difference in slope or the relative offset of midpoints.
+
+        // We will return 0 for now as 2D twist is unreliable without temporal tracking or 3D lifting.
+        // Placeholder for future logic.
+        return 0;
+    }
+
+    /**
+     * Calculate neck twist (rotation)
+     * @param {Object} keypoints - All keypoints
+     * @returns {number} Angle in degrees
+     */
+    calculateNeckTwist(keypoints) {
+        // Similar to trunk twist, difficult in 2D.
+        return 0;
+    }
+
+    /**
+     * Calculate all angles for ergonomic analysis (Both sides + Generic fallback)
+     * @param {Object} keypoints - All keypoints
+     * @param {string} side - 'left' or 'right' (default for generic keys)
      * @returns {Object} All calculated angles
      */
     calculateAllAngles(keypoints, side = 'right') {
-        return {
-            upperArm: this.calculateUpperArmAngle(keypoints, side),
-            lowerArm: this.calculateLowerArmAngle(keypoints, side),
-            wrist: this.calculateWristAngle(keypoints, side),
-            neck: this.calculateNeckAngle(keypoints),
-            trunk: this.calculateTrunkAngle(keypoints),
-            leg: this.calculateLegAngle(keypoints, side)
+        const angles = {
+            // Trunk & Neck (Central)
+            trunkFlexion: this.calculateTrunkAngle(keypoints),
+            neckFlexion: this.calculateNeckAngle(keypoints),
+            trunkTwist: this.calculateTrunkTwist(keypoints),
+            neckTwist: this.calculateNeckTwist(keypoints),
+
+            // Arms (Right)
+            upperArmFlexionRight: this.calculateUpperArmAngle(keypoints, 'right'),
+            lowerArmFlexionRight: this.calculateLowerArmAngle(keypoints, 'right'),
+            wristFlexionRight: this.calculateWristAngle(keypoints, 'right'),
+
+            // Arms (Left)
+            upperArmFlexionLeft: this.calculateUpperArmAngle(keypoints, 'left'),
+            lowerArmFlexionLeft: this.calculateLowerArmAngle(keypoints, 'left'),
+            wristFlexionLeft: this.calculateWristAngle(keypoints, 'left'),
+
+            // Legs
+            legFlexionRight: this.calculateLegAngle(keypoints, 'right'),
+            legFlexionLeft: this.calculateLegAngle(keypoints, 'left'),
+
+            // Support
+            legSupport: 1
         };
+
+        // Add generic keys for backward compatibility (RULA/REBA expect these)
+        // Maps to the requested 'side'
+        angles.upperArm = side === 'left' ? angles.upperArmFlexionLeft : angles.upperArmFlexionRight;
+        angles.lowerArm = side === 'left' ? angles.lowerArmFlexionLeft : angles.lowerArmFlexionRight;
+        angles.wrist = side === 'left' ? angles.wristFlexionLeft : angles.wristFlexionRight;
+        angles.neck = angles.neckFlexion;
+        angles.trunk = angles.trunkFlexion;
+        angles.leg = side === 'left' ? angles.legFlexionLeft : angles.legFlexionRight;
+
+        return angles;
     }
 
     /**

@@ -1,22 +1,49 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getAllSessions } from '../utils/database';
+import { generateLayoutOptimization } from '../utils/aiGenerator';
+import { Sparkles, RefreshCw } from 'lucide-react';
 
-function SpaghettiChart() {
+function SpaghettiChart({ currentProject, projectMeasurements }) {
     const [sessions, setSessions] = useState([]);
     const [selectedSessionId, setSelectedSessionId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [nodes, setNodes] = useState([]);
     const [gridSize, setGridSize] = useState(50);
+    const [isOptimizing, setIsOptimizing] = useState(false);
     const canvasRef = useRef(null);
 
     useEffect(() => {
+        console.log("SpaghettiChart mounted/updated");
+        console.log("Current Project:", currentProject);
+        console.log("Project Measurements:", projectMeasurements);
         loadSessions();
-    }, []);
+    }, [currentProject, projectMeasurements]);
 
     const loadSessions = async () => {
         try {
             const allSessions = await getAllSessions();
             allSessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Add current project as a session option
+            if (currentProject && projectMeasurements && projectMeasurements.length > 0) {
+                console.log("Adding current project to sessions");
+                const projectSession = {
+                    id: 'current-project',
+                    videoName: `📂 Current Project: ${currentProject.name}`,
+                    timestamp: new Date().toISOString(),
+                    measurements: projectMeasurements
+                };
+                allSessions.unshift(projectSession);
+
+                // Auto-select if nothing selected
+                if (!selectedSessionId) {
+                    console.log("Auto-selecting current project");
+                    setSelectedSessionId('current-project');
+                }
+            } else {
+                console.warn("Current project data missing or empty:", { currentProject, measurements: projectMeasurements });
+            }
+
             setSessions(allSessions);
         } catch (error) {
             console.error('Error loading sessions:', error);
@@ -208,6 +235,67 @@ function SpaghettiChart() {
         };
     };
 
+
+
+    const handleOptimizeLayout = async () => {
+        console.log("Optimize clicked", selectedSession, nodes);
+        if (!selectedSession || nodes.length === 0) {
+            alert("No session selected or no nodes found");
+            return;
+        }
+
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) {
+            alert("Please configure your AI API Key in Settings first.");
+            return;
+        }
+
+        setIsOptimizing(true);
+
+        try {
+            console.log("Calculating flow data...");
+            // 1. Calculate Flow Data (From -> To frequency)
+            const flowMap = {};
+            const measurements = selectedSession.measurements;
+
+            for (let i = 0; i < measurements.length - 1; i++) {
+                const from = measurements[i].elementName;
+                const to = measurements[i + 1].elementName;
+                if (from === to) continue;
+
+                const key = `${from}|${to}`;
+                flowMap[key] = (flowMap[key] || 0) + 1;
+            }
+
+            const flowData = Object.entries(flowMap).map(([key, count]) => {
+                const [from, to] = key.split('|');
+                return { from, to, count };
+            });
+
+            console.log("Flow Data:", flowData);
+            // 2. Call AI
+            console.log("Calling AI...");
+            const optimizedNodes = await generateLayoutOptimization(nodes, flowData, apiKey);
+            console.log("AI Response:", optimizedNodes);
+
+            // 3. Update Nodes
+            if (Array.isArray(optimizedNodes)) {
+                const newNodes = nodes.map(n => {
+                    const opt = optimizedNodes.find(on => on.name === n.name);
+                    return opt ? { ...n, x: opt.x, y: opt.y } : n;
+                });
+                setNodes(newNodes);
+                alert("✨ Layout Optimized! Nodes have been rearranged to minimize travel distance.");
+            }
+
+        } catch (error) {
+            console.error("Optimization failed:", error);
+            alert("Failed to optimize layout: " + error.message);
+        } finally {
+            setIsOptimizing(false);
+        }
+    };
+
     const stats = calculateStatistics();
 
     return (
@@ -215,17 +303,41 @@ function SpaghettiChart() {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>🍝 Spaghetti Chart - Movement Diagram</h2>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <label style={{ color: '#ccc', fontSize: '0.9rem' }}>Grid Size:</label>
-                    <input
-                        type="range"
-                        min="25"
-                        max="100"
-                        value={gridSize}
-                        onChange={(e) => setGridSize(Number(e.target.value))}
-                        style={{ width: '100px' }}
-                    />
-                    <span style={{ color: '#ccc', fontSize: '0.9rem' }}>{gridSize}px</span>
+                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+
+                    <button
+                        onClick={handleOptimizeLayout}
+                        disabled={isOptimizing || !selectedSession}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 16px',
+                            backgroundColor: isOptimizing ? '#555' : 'var(--accent-blue)', // Use global accent or fallback
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: isOptimizing || !selectedSession ? 'not-allowed' : 'pointer',
+                            fontWeight: 'bold',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                        }}
+                    >
+                        {isOptimizing ? <RefreshCw size={16} className="spin" /> : <Sparkles size={16} />}
+                        {isOptimizing ? 'Optimizing...' : 'Generative Optimize'}
+                    </button>
+
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', backgroundColor: '#333', padding: '5px 10px', borderRadius: '6px' }}>
+                        <label style={{ color: '#ccc', fontSize: '0.9rem' }}>Grid:</label>
+                        <input
+                            type="range"
+                            min="25"
+                            max="100"
+                            value={gridSize}
+                            onChange={(e) => setGridSize(Number(e.target.value))}
+                            style={{ width: '80px' }}
+                        />
+                        <span style={{ color: '#ccc', fontSize: '0.9rem', minWidth: '35px' }}>{gridSize}px</span>
+                    </div>
                 </div>
             </div>
 
@@ -236,7 +348,10 @@ function SpaghettiChart() {
                 </label>
                 <select
                     value={selectedSessionId || ''}
-                    onChange={(e) => handleSessionSelect(Number(e.target.value))}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        handleSessionSelect(isNaN(Number(val)) ? val : Number(val));
+                    }}
                     style={{
                         width: '100%',
                         maxWidth: '500px',
@@ -324,19 +439,20 @@ function SpaghettiChart() {
                                 <div>(Nx) = Visit frequency</div>
                             </div>
                         </div>
+
+                        <div style={{ backgroundColor: '#1a1a1a', padding: '15px', borderRadius: '8px', border: '1px solid #333' }}>
+                            <h3 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: '#4da6ff' }}>📌 Instructions</h3>
+                            <div style={{ fontSize: '0.8rem', color: '#ddd', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <div>1. Drag nodes to rearrange layout</div>
+                                <div>2. Click "Generative Optimize" to improve</div>
+                                <div>3. Analyze flow efficiency</div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
 
-            {!selectedSession && (
-                <div style={{ textAlign: 'center', color: '#666', padding: '20px', backgroundColor: '#1a1a1a', borderRadius: '8px' }}>
-                    <p style={{ fontSize: '1.2rem', margin: '10px 0' }}>📌 How to Use</p>
-                    <p style={{ fontSize: '0.9rem', margin: '5px 0' }}>1. Select a session from the dropdown above</p>
-                    <p style={{ fontSize: '0.9rem', margin: '5px 0' }}>2. View the movement flow diagram</p>
-                    <p style={{ fontSize: '0.9rem', margin: '5px 0' }}>3. Drag nodes to arrange layout</p>
-                    <p style={{ fontSize: '0.9rem', margin: '5px 0' }}>4. Analyze movement patterns & identify waste</p>
-                </div>
-            )}
+
         </div>
     );
 }

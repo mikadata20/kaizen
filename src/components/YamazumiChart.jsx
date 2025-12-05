@@ -11,6 +11,7 @@ function YamazumiChart({ measurements: propMeasurements = [] }) {
     const [taktTime, setTaktTime] = useState(30); // Default takt time in seconds
     const [showTaktLine, setShowTaktLine] = useState(true);
     const [isBalancingMode, setIsBalancingMode] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 
     const [showChat, setShowChat] = useState(false);

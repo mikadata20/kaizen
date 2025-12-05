@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Sparkles } from 'lucide-react';
 import ProjectGanttChart from './ProjectGanttChart';
+import KaizenReportDialog from './features/KaizenReportDialog';
 import { calculateAllProductivityMetrics } from '../utils/productivityMetrics';
 import HelpButton from './HelpButton';
 import { helpContent } from '../utils/helpContent.jsx';
 
 function AnalysisDashboard({ measurements = [] }) {
+    const [isReportOpen, setIsReportOpen] = useState(false);
+
     if (measurements.length === 0) {
         return (
             <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
@@ -66,14 +70,49 @@ function AnalysisDashboard({ measurements = [] }) {
     return (
         <div style={{ padding: '15px', backgroundColor: 'var(--bg-secondary)', height: '100%', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem' }}>
-                    📊 Analysis Summary
-                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem' }}>
+                        📊 Analysis Summary
+                    </h2>
+                    <button
+                        onClick={() => setIsReportOpen(true)}
+                        style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#00d2ff',
+                            color: '#000',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontSize: '0.85rem',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        <Sparkles size={16} /> One-Click Kaizen Report
+                    </button>
+                </div>
                 <HelpButton
                     title={helpContent['analysis'].title}
                     content={helpContent['analysis'].content}
                 />
             </div>
+
+            <KaizenReportDialog
+                isOpen={isReportOpen}
+                onClose={() => setIsReportOpen(false)}
+                projectData={{
+                    projectName: "Current Project", // Ideally passed from props
+                    elements: measurements,
+                    metrics: {
+                        totalCycleTime: totalTime,
+                        valueAddedRatio: totalTime > 0 ? valueAddedTime / totalTime : 0,
+                        efficiencyScore: efficiency?.efficiency ? efficiency.efficiency / 100 : 0,
+                        productivityIndex: summary?.productivityIndex || 0
+                    }
+                }}
+            />
 
             {/* Statistics Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '20px' }}>
