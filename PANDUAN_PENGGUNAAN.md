@@ -621,6 +621,59 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 
 ---
 
+
+---
+
+### 23. 📦 Object Detection & Tracking (BARU!)
+
+**🎯 Tujuan:** Mendeteksi dan melacak pergerakan objek (seperti tools, parts, atau tangan) secara otomatis dalam video untuk analisis flow dan frekuensi penggunaan.
+
+**Fitur:**
+- **Real-time Detection:** Menggunakan AI (COCO-SSD) untuk mengenali 80+ jenis objek.
+- **Object Tracking:** Melacak ID unik setiap objek yang bergerak antar frame.
+- **Visual Trails:** Menampilkan jejak pergerakan objek.
+- **Statistics:** Menghitung jumlah objek dan frekuensi kemunculan.
+
+**Cara Pakai:**
+1. Klik icon 📦 di header.
+2. Video akan diproses untuk mendeteksi objek.
+3. **Filter:** Pilih objek yang ingin ditampilkan (misal: "bottle", "person").
+4. **Options:** Toggle "Show Trails" untuk melihat jejak.
+5. **Export:** Download data tracking untuk analisis lebih lanjut.
+
+**Use Case:**
+- Menghitung frekuensi pengambilan part.
+- Analisis "Spaghetti Diagram" otomatis dari pergerakan material.
+- Safety: mendeteksi orang di area berbahaya.
+
+---
+
+### 24. 🔮 Predictive Maintenance AI (Fatigue Prediction) (BARU!)
+
+**🎯 Tujuan:** Memprediksi kelelahan operator (fatigue) dan penurunan performa berdasarkan analisis tren cycle time.
+
+**Fitur:**
+- **Energy Gauge:** Indikator visual "energi" operator (0-100%).
+- **Trend Prediction:** Grafik prediksi performa untuk 10 cycle ke depan.
+- **Fatigue Alerts:** Peringatan otomatis jika operator terdeteksi melambat signifikan.
+- **Variability Analysis:** Deteksi ketidakkonsistenan gerakan.
+
+**Cara Pakai:**
+1. Klik icon 🔮 di header.
+2. Lakukan pengukuran cycle time pada video (min. 3 cycle).
+3. **Analisis Otomatis:** Sistem akan menghitung tren.
+4. **Monitor Gauge:**
+   - 🟢 **Green (High Energy):** Performa stabil.
+   - 🟡 **Yellow (Warning):** Mulai melambat atau tidak konsisten.
+   - 🔴 **Red (Critical):** Terdeteksi fatigue signifikan.
+
+**Use Case:**
+- Menentukan jadwal istirahat yang optimal (micro-breaks).
+- Mencegah error akibat kelelahan.
+- Validasi beban kerja (workload analysis).
+
+---
+
 ## 📝 Panduan Step-by-Step
 
 ### Workflow 1: Analisis Video Baru
@@ -651,12 +704,13 @@ Aplikasi terdiri dari **Header Navigation** dengan icon-icon fitur:
 
 ## 📈 Update Log
 
-### Version 2.3 (Current)
-- ✅ **New**: Multi-Camera 3D Fusion (Dual-view ergonomic analysis)
-- ✅ **New**: VR Training Mode (Immersive operator training)
-- ✅ **New**: Drawing Tools in VR Training (Pen, Arrow, Circle, Rectangle, Line, Text)
-- ✅ **New**: Knowledge Base & Best Practices Library (Templates, Videos, Rating System)
-- ✅ **Update**: Enhanced video playback controls
+### Version 2.4 (Current)
+- ✅ **New**: Predictive Maintenance AI (Operator Fatigue Prediction)
+- ✅ **New**: Object Detection & Tracking (Automated Flow Analysis)
+- ✅ **Fix**: Enhanced stability & import fixes
+- ✅ **Update**: Updated Documentation
+
+### Version 2.3
 
 ### Version 2.2
 - ✅ **New**: Machine Learning Data (Consistency Check with Golden Cycle)

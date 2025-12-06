@@ -13,6 +13,9 @@ import VoiceCommandPanel from './features/VoiceCommandPanel';
 import ErgonomicAnalysis from './ErgonomicAnalysis';
 import { useVideoPlayer } from '../hooks/useVideoPlayer';
 import { captureScreenshot, exportAnalysisData } from '../utils/screenshotCapture';
+import CollaborationManager from '../utils/CollaborationManager';
+import CollaborationControl from './features/CollaborationControl';
+import CollaborationOverlay from './features/CollaborationOverlay';
 
 function VideoWorkspace({
     measurements,
@@ -58,6 +61,12 @@ function VideoWorkspace({
     const videoContainerRef = useRef(null);
     const isResizing = useRef(false);
 
+    // Collaboration State
+    const [collaborationManager, setCollaborationManager] = useState(null);
+    const [isSyncEnabled, setIsSyncEnabled] = useState(false);
+    const [remoteCursors, setRemoteCursors] = useState({});
+    const isRemoteUpdate = useRef(false); // Flag to prevent echo loops
+
     // Use video player hook
     const {
         videoRef,
@@ -82,22 +91,128 @@ function VideoWorkspace({
         const updateGlobalRef = () => {
             if (videoRef.current) {
                 window.__motionVideoElement = videoRef.current;
-                // console.log('[VideoWorkspace] Updated global video reference');
             }
         };
-
-        // Update immediately
         updateGlobalRef();
-
-        // Also update on an interval to catch late initialization
         const interval = setInterval(updateGlobalRef, 1000);
-
         return () => {
             clearInterval(interval);
             window.__motionVideoElement = null;
-            // console.log('[VideoWorkspace] Cleared global video reference');
         };
     }, [videoRef, videoSrc, isWebcamActive, isStreamConnected]);
+
+    // Initialize Collaboration Manager
+    useEffect(() => {
+        const manager = new CollaborationManager();
+        setCollaborationManager(manager);
+
+        const handlePlaybackUpdate = (state) => {
+            if (!videoRef.current || !isSyncEnabled) return;
+
+            isRemoteUpdate.current = true;
+
+            // Sync Play/Pause
+            if (state.isPlaying && videoRef.current.paused) {
+                videoRef.current.play().catch(e => console.warn("Remote play failed", e));
+            } else if (!state.isPlaying && !videoRef.current.paused) {
+                videoRef.current.pause();
+            }
+
+            // Sync Time (if drift > 0.5s)
+            if (Math.abs(videoRef.current.currentTime - state.currentTime) > 0.5) {
+                videoRef.current.currentTime = state.currentTime;
+            }
+
+            // Sync Speed
+            if (videoRef.current.playbackRate !== state.speed) {
+                videoRef.current.playbackRate = state.speed;
+                setPlaybackSpeed(state.speed); // Update local state for UI
+            }
+
+            // Reset flag after a short delay
+            setTimeout(() => { isRemoteUpdate.current = false; }, 100);
+        };
+
+        const handleCursorMove = ({ userId, x, y, name, color }) => {
+            setRemoteCursors(prev => ({
+                ...prev,
+                [userId]: { x, y, name, color: color || '#ff0000', lastUpdate: Date.now() }
+            }));
+        };
+
+        manager.on('playback', handlePlaybackUpdate);
+        manager.on('cursor', handleCursorMove);
+
+        // Cleanup old cursors
+        const cursorInterval = setInterval(() => {
+            const now = Date.now();
+            setRemoteCursors(prev => {
+                const next = { ...prev };
+                let changed = false;
+                Object.keys(next).forEach(key => {
+                    if (now - next[key].lastUpdate > 3000) { // Remove after 3s inactivity
+                        delete next[key];
+                        changed = true;
+                    }
+                });
+                return changed ? next : prev;
+            });
+        }, 1000);
+
+        return () => {
+            manager.close();
+            clearInterval(cursorInterval);
+        };
+    }, [isSyncEnabled]); // Re-attach if sync toggled? Actually manager should persist, but listeners depend on isSyncEnabled state? No, listeners can utilize ref or state. 
+    // Correction: isSyncEnabled is in dependency, so it reconnects listeners. Ideally, we just check isSyncEnabled inside listener.
+    // The previous code captures isSyncEnabled in closure. So adding it to dependency is correct to refresh closure, BUT recreating manager is bad.
+    // Better: Use a ref for isSyncEnabled inside listener.
+
+    const isSyncEnabledRef = useRef(isSyncEnabled);
+    useEffect(() => { isSyncEnabledRef.current = isSyncEnabled; }, [isSyncEnabled]);
+
+    // Broadcast Local Playback Events
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video || !collaborationManager) return;
+
+        const broadcastState = () => {
+            if (isRemoteUpdate.current || !isSyncEnabledRef.current) return;
+
+            collaborationManager.sendPlaybackUpdate({
+                isPlaying: !video.paused,
+                currentTime: video.currentTime,
+                speed: video.playbackRate
+            });
+        };
+
+        video.addEventListener('play', broadcastState);
+        video.addEventListener('pause', broadcastState);
+        video.addEventListener('seeked', broadcastState);
+        video.addEventListener('ratechange', broadcastState);
+
+        return () => {
+            video.removeEventListener('play', broadcastState);
+            video.removeEventListener('pause', broadcastState);
+            video.removeEventListener('seeked', broadcastState);
+            video.removeEventListener('ratechange', broadcastState);
+        };
+    }, [videoRef.current, collaborationManager]); // Listeners attached when video ref updates
+
+    // Track Local Cursor
+    const handleContainerMouseMove = (e) => {
+        if (!collaborationManager || !isSyncEnabled) return;
+        if (!videoContainerRef.current) return;
+
+        const rect = videoContainerRef.current.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+
+        // Only broadcast if inside container 0-1 range
+        if (x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+            collaborationManager.sendCursor(x, y);
+        }
+    };
 
     const startResizing = useCallback(() => {
         isResizing.current = true;
@@ -256,6 +371,14 @@ function VideoWorkspace({
                     marginBottom: '10px',
                     flexWrap: 'wrap'
                 }}>
+                    {/* Collaboration Control */}
+                    <div style={{ position: 'relative' }}>
+                        <CollaborationControl
+                            manager={collaborationManager}
+                            isSyncEnabled={isSyncEnabled}
+                            onSyncToggle={setIsSyncEnabled}
+                        />
+                    </div>
                     {/* Logout Button */}
                     {onLogout && (
                         <button
@@ -446,14 +569,17 @@ function VideoWorkspace({
                         </>
                     )}
                 </div>
-                <div ref={videoContainerRef} style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                    position: 'relative'
-                }}>
+                <div
+                    ref={videoContainerRef}
+                    onMouseMove={handleContainerMouseMove}
+                    style={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        position: 'relative'
+                    }}>
                     {/* Video element - always rendered for webcam/stream support */}
                     <div style={{
                         transform: `scale(${videoState.zoom})`,
@@ -500,6 +626,13 @@ function VideoWorkspace({
                                 drawColor={drawColor}
                                 lineWidth={lineWidth}
                             />
+                        )}
+
+                        {/* Collaboration Overlay */}
+                        {isSyncEnabled && (
+                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 900 }}>
+                                <CollaborationOverlay remoteCursors={remoteCursors} />
+                            </div>
                         )}
                     </div>
 

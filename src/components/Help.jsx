@@ -56,6 +56,8 @@ function Help() {
 📑 **Multi-Axial** - Analisis multi-project (Man-Machine/Two-Hand)
 📘 **Manual** - Pembuatan manual kerja (Work Instruction)
 🧠 **ML Data** - Machine Learning Consistency Check
+📦 **Object Tracking** - Deteksi objek otomatis & flow analysis
+🔮 **Predictive Maint** - Prediksi fatigue operator (AI)
 📹 **Multi-Camera** - Analisis 3D Fusion dari 2 sudut pandang
 🥽 **VR Training** - Mode pelatihan immersive untuk operator baru
 📚 **Knowledge Base** - Repository templates & best practices
@@ -677,6 +679,54 @@ Repository of standard work dan best practices untuk standardisasi metode kerja 
 • Training materials
 • Template reuse
 • Knowledge retention
+            `
+        },
+        objecttracking: {
+            title: '📦 Object Detection & Tracking',
+            content: `
+**Fungsi:**
+Mendeteksi dan melacak pergerakan objek (tools, parts, hands) secara otomatis menggunakan AI untuk analisis flow.
+
+**Cara Pakai:**
+1. Klik icon 📦 di header
+2. Video akan diproses otomatis
+3. Filter objek: person, bottle, cell phone, dll
+4. Toggle "Show Trails" untuk melihat jejak pergerakan
+
+**Output:**
+• Jumlah objek terdeteksi
+• Visual bounding boxes & trails
+• Koordinat pergerakan
+
+**Use Case:**
+• Hitung frekuensi pengambilan part
+• Analisis layout (spaghetti diagram)
+• Safety monitoring
+            `
+        },
+        predictivemaintenance: {
+            title: '🔮 Predictive Maintenance AI',
+            content: `
+**Fungsi:**
+Prediksi kelelahan operator (fatigue) berdasarkan analisis tren cycle time.
+
+**Cara Pakai:**
+1. Klik icon 🔮
+2. Lakukan pengukuran cycle time (min 3 cycles)
+3. Monitor Gauge & Grafik
+
+**Indikator:**
+🟢 **Green**: Stabil & Fresh (Energy > 70%)
+🟡 **Yellow**: Warning/Slowing Down (Energy 40-70%)
+🔴 **Red**: Critical Fatigue (Energy < 40%)
+
+**Analisis:**
+• **Trend**: Stable, Declining, Improving
+• **Variability**: Konsistensi gerakan
+• **Prediction**: Estimasi performa 10 cycle ke depan
+
+**Recommendation:**
+Sistem akan menyarankan "Micro-break" jika fatigue terdeteksi untuk menjaga kualitas dan safety.
             `
         }
     };

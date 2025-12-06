@@ -336,7 +336,40 @@ function Header({ videoName, onUpload, currentView, setCurrentView, onOpenSessio
                     >
                         🧠
                     </button>
-
+                    <button
+                        className="btn"
+                        style={{
+                            backgroundColor: currentView === 'object-tracking' ? 'var(--accent-blue)' : '',
+                            padding: '8px',
+                            fontSize: '1.2rem',
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                        onClick={() => setCurrentView('object-tracking')}
+                        title="Object Detection & Tracking"
+                    >
+                        📦
+                    </button>
+                    <button
+                        className="btn"
+                        style={{
+                            backgroundColor: currentView === 'predictive-maintenance' ? 'var(--accent-blue)' : '',
+                            padding: '8px',
+                            fontSize: '1.2rem',
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                        onClick={() => setCurrentView('predictive-maintenance')}
+                        title="Predictive Maintenance (Fatigue)"
+                    >
+                        🔮
+                    </button>
                     <button
                         className="btn"
                         style={{

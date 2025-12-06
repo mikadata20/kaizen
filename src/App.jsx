@@ -21,21 +21,22 @@ import MTMCalculator from './components/MTMCalculator';
 import AllowanceCalculator from './components/AllowanceCalculator';
 import YamazumiChart from './components/YamazumiChart';
 import MultiAxialAnalysis from './components/MultiAxialAnalysis';
-import ManualCreation from './components/ManualCreation';
+import MultiCameraFusion from './components/MultiCameraFusion';
+import VRTrainingMode from './components/VRTrainingMode';
+import KnowledgeBase from './components/KnowledgeBase';
+import ObjectTracking from './components/ObjectTracking';
+import PredictiveMaintenance from './components/PredictiveMaintenance';
 import BroadcastManager from './components/features/BroadcastManager';
 import BroadcastViewer from './components/features/BroadcastViewer';
-import StreamHandler from './utils/streamHandler';
+import CollaborationOverlay from './components/features/CollaborationOverlay';
+import BroadcastControls from './components/features/BroadcastControls';
 import MachineLearningData from './components/MachineLearningData';
 import ActionRecognition from './components/ActionRecognition';
 import SpaghettiChart from './components/SpaghettiChart';
 import { saveProject, getProjectByName, updateProject } from './utils/database';
 import { importProject } from './utils/projectExport';
+import StreamHandler from './utils/streamHandler';
 import { LanguageProvider } from './i18n/LanguageContext';
-import CollaborationOverlay from './components/features/CollaborationOverlay';
-import BroadcastControls from './components/features/BroadcastControls';
-import MultiCameraFusion from './components/MultiCameraFusion';
-import VRTrainingMode from './components/VRTrainingMode';
-import KnowledgeBase from './components/KnowledgeBase';
 import './index.css';
 
 function App() {
@@ -466,6 +467,20 @@ function App() {
           ) : currentView === 'action-recognition' ? (
             <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
               <ActionRecognition videoSrc={videoSrc} onActionsDetected={setMeasurements} />
+            </div>
+          ) : currentView === 'object-tracking' ? (
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <ObjectTracking
+                videoSrc={videoSrc}
+                measurements={measurements}
+                onUpdateMeasurements={setMeasurements}
+              />
+            </div>
+          ) : currentView === 'predictive-maintenance' ? (
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <PredictiveMaintenance
+                measurements={measurements}
+              />
             </div>
           ) : null}
         </div>

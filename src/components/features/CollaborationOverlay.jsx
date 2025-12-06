@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-const CollaborationOverlay = ({ cursor, lastDrawingAction }) => {
+const CollaborationOverlay = ({ remoteCursors = {}, lastDrawingAction }) => {
     const canvasRef = useRef(null);
     const lastPoint = useRef(null);
 
@@ -39,8 +39,6 @@ const CollaborationOverlay = ({ cursor, lastDrawingAction }) => {
                 ctx.moveTo(drawX, drawY);
                 lastPoint.current = { x: drawX, y: drawY };
             } else if (action === 'draw') {
-                // If we have a last point, start from there to ensure continuity
-                // This handles the case where 'start' might have been missed or for smooth lines
                 if (lastPoint.current) {
                     ctx.beginPath();
                     ctx.moveTo(lastPoint.current.x, lastPoint.current.y);
@@ -62,7 +60,7 @@ const CollaborationOverlay = ({ cursor, lastDrawingAction }) => {
             width: '100vw',
             height: '100vh',
             pointerEvents: 'none',
-            zIndex: 9998 // Below the cursor but above content
+            zIndex: 9998
         }}>
             <canvas
                 ref={canvasRef}
@@ -71,8 +69,9 @@ const CollaborationOverlay = ({ cursor, lastDrawingAction }) => {
                     height: '100%'
                 }}
             />
-            {cursor && cursor.x !== null && (
+            {Object.entries(remoteCursors).map(([userId, cursor]) => (
                 <div
+                    key={userId}
                     style={{
                         position: 'absolute',
                         left: `${cursor.x * 100}%`,
@@ -80,34 +79,32 @@ const CollaborationOverlay = ({ cursor, lastDrawingAction }) => {
                         transform: 'translate(-50%, -50%)',
                         pointerEvents: 'none',
                         zIndex: 9999,
-                        transition: 'all 0.1s ease-out'
+                        transition: 'all 0.1s linear' // Smooth interpolation
                     }}
                 >
+                    {/* Cursor Icon (Arrow) */}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0px 2px 2px rgba(0,0,0,0.3))' }}>
+                        <path d="M5.65376 12.3673H5.46026L5.31717 12.4976L0.500002 16.8829L0.500002 1.19177L11.7841 12.3673H5.65376Z" fill={cursor.color || '#ff0000'} stroke="white" strokeWidth="1" />
+                    </svg>
+
+                    {/* Name Label */}
                     <div style={{
-                        width: '20px',
-                        height: '20px',
-                        backgroundColor: 'rgba(255, 0, 0, 0.5)',
-                        border: '2px solid red',
-                        borderRadius: '50%'
-                    }} />
-                    {cursor.label && (
-                        <div style={{
-                            position: 'absolute',
-                            top: '25px',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            backgroundColor: 'red',
-                            color: 'white',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            whiteSpace: 'nowrap'
-                        }}>
-                            {cursor.label}
-                        </div>
-                    )}
+                        position: 'absolute',
+                        top: '20px',
+                        left: '10px',
+                        backgroundColor: cursor.color || '#ff0000',
+                        color: 'white',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontSize: '11px',
+                        whiteSpace: 'nowrap',
+                        fontWeight: 'bold',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}>
+                        {cursor.name || userId}
+                    </div>
                 </div>
-            )}
+            ))}
         </div>
     );
 };
